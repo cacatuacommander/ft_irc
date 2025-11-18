@@ -88,6 +88,7 @@ int main()
 					{
 						std::cout << "New client connected (fd=" << new_fd << ")\n";
 						fds.push_back((pollfd){ new_fd, POLLIN, 0 });
+						//qui creare anche oggetto utente con solo l'fd dentro;
 					}
 				}
 				// b) Client socket → incoming message
