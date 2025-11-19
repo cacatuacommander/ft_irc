@@ -2,30 +2,73 @@
 #include "irc.hpp"
 #include <iostream>
 
-void execNick(std::string newnickname, int fd, std::vector<User> & uservect)
+bool isValidNickname(std::string newnickname, int fd, std::string & oldnick)
 {
-	//se password c'e ed e' giusta lo controllo qui?
-	//controllo che newnickname non sia "" lo faccio qui?
-	std::vector<User>::iterator it;
-	for (it = uservect.begin(); it != uservect.end(); ++it)
-	{
-		if (it->getFd() == fd)
-			break;
-	}
-	
 	if (newnickname == "" || newnickname.length() < 1)
 	{
-		std::string reply = std::string(SERVER_NAME) + std::string(" 431 ") + it->getNickName() + " :\r\n";
+		std::string reply = std::string(SERVER_NAME) + std::string(" 432 ") + oldnick +  " " + newnickname + " :Erroneous nickname\r\n";
 		send(fd, reply.c_str(), reply.size(), 0);
-		return ;
+		return false;
 	}
+	if (newnickname.length() > 30 || !((newnickname[0] > 'A' && newnickname[0] > 'Z') || (newnickname[0] > 'a' &&  newnickname[0] > 'z') || \
+			newnickname[0] == '[' || newnickname[0] == ']' || newnickname[0] ==  '\'' || newnickname[0] ==  '`' || \
+			newnickname[0] == '^' || newnickname[0] == '_'))
+	{
+		std::string reply = std::string(SERVER_NAME) + std::string(" 432 ") + oldnick + " " + newnickname + " :Erroneous nickname\r\n";
+		send(fd, reply.c_str(), reply.size(), 0);
+		return false;
+	}	
+	size_t i = 1;
+	while (i < newnickname.length())
+	{
+		if (!((newnickname[i] >= 'A' && newnickname[i] <= 'Z') || (newnickname[i] >= 'i' && newnickname[i] <= '9') || (newnickname[i] >= 'a' &&  newnickname[i] <= 'z') || \
+			newnickname[i] == '[' || newnickname[i] == ']' || newnickname[i] ==  '\'' || newnickname[i] ==  '`' || \
+			newnickname[i] == '^' || newnickname[i] == '_' || newnickname[i] == '-' ))
+		{
+			std::string reply = std::string(SERVER_NAME) + std::string(" 432 ") + oldnick + " " + newnickname + " :Erroneous nickname\r\n";
+			send(fd, reply.c_str(), reply.size(), 0);
+			return false;
+		}
+		i++;
+	}
+	if (newnickname == "admin" || newnickname == "root")
+	{
+		//forse da levare ma ci sta
+		std::string reply = std::string(SERVER_NAME) + std::string(" 437 ") + oldnick + " " + newnickname + " :Nickname/channel is temporarily unavailable\r\n";
+		send(fd, reply.c_str(), reply.size(), 0);
+		return false;
+	}
+	return true;
+}
 
+bool nicknameAlredyInUse(std::string newnickname, int fd, std::vector<User> & uservect, std::string & oldnick)
+{
+	std::vector<User>::iterator it = searchVectWithNick(uservect, newnickname);
 	if (it != uservect.end())
 	{
-		//CONTROLLARE CHE NON SIA GIA IN USO
+		std::string reply = std::string(SERVER_NAME) + std::string(" 433 ") + oldnick + " " + newnickname + " :Nickname is already in use\r\n";
+		send(fd, reply.c_str(), reply.size(), 0);
+		return true;
+	}
+	return false;
+}
+
+void execNick(std::string newnickname, int fd, std::vector<User> & uservect)
+{
+	std::vector<User>::iterator it = searchVectWithFd(uservect, fd);
+	
+	if (it != uservect.end())
+	{
+		std::string oldnick = it->getNickName();
+		if (oldnick == "")
+			oldnick = "*";
+
+		if (!isValidNickname(newnickname, fd, oldnick))
+			return ;
+		if (nicknameAlredyInUse(newnickname, fd, uservect, oldnick))
+			return ;
 		it->setNickName(newnickname);
 		//std::cout << "nick aggiornato a:" << newnickname << std::endl;
-		//scrivere send con successo operazione?
 	}
 	else
 	{
@@ -33,22 +76,28 @@ void execNick(std::string newnickname, int fd, std::vector<User> & uservect)
 	}
 }
 
+bool usernameAlredySet(std::vector<User>::iterator it, int fd, std::string & newnickname)
+{
+	if (it->getIsVerified())
+	{
+		std::string reply = std::string(SERVER_NAME) + std::string(" 462 ") + it->getNickName() + " :You may not reregister\r\n";
+		send(fd, reply.c_str(), reply.size(), 0);
+		return true;
+	}
+}
+
 void execUser(std::string newusername, int fd, std::vector<User> & uservect)
 {
-	//se password c'e ed e' giusta lo controllo qui?
-	//controllo che newusername non sia "" lo faccio qui?
-	//faccio controllo che anche nick debba gia esserci per poter mettere user? (MEGLIO DI SI FORSE)
-	std::vector<User>::iterator it;
-	for (it = uservect.begin(); it != uservect.end(); ++it)
-	{
-		if (it->getFd() == fd)
-			break;
-	}
+	std::vector<User>::iterator it = searchVectWithFd(uservect, fd);
+
 	if (it != uservect.end())
 	{
+		if (usernameAlredySet(it, fd, newusername))
+			return ;
 		it->setUserName(newusername);
+		it->setIsVerified();
+		//
 		//std::cout << "user aggiornato a:" << newusername << std::endl;
-		//scrivere send con successo operazione?
 	}
 	else
 	{
@@ -57,8 +106,7 @@ void execUser(std::string newusername, int fd, std::vector<User> & uservect)
 }
 
 void execPass(std::string newpassword, int fd, std::vector<User> & uservect, std::string realpassword)
-{	
-	//controllo che newpassword non sia "" lo faccio qui?
+{
 	std::vector<User>::iterator it = searchVectWithFd(uservect, fd);
 
 	if (it != uservect.end())
@@ -73,13 +121,9 @@ void execPass(std::string newpassword, int fd, std::vector<User> & uservect, std
 				send(fd, reply.c_str(), reply.size(), 0);
 			}	
 			//std::cout << "psw aggiornata a:" << newpassword << std::endl;
-			//scrivere send con successo operazione?
 		}
 		else
 		{
-			//std::cerr << "ERR_ALREDYREGISTERED" << std::endl;
-			//caso di nick o user gia inseriti (e quindi anche pass era stata gia inserita correttamente) lo faccio qui(?)
-			//fare send di errore ERR_ALREADYREGISTRED
 			std::string temp = it->getNickName();
 			if (temp == "")
 				temp = "*";

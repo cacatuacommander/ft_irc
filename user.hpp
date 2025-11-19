@@ -20,11 +20,12 @@ class User
 	void setNickName(std::string & newnickname);
 	void setUserName(std::string & newusername);
 	void setPassword();
+	void setIsVerified();
 
-	bool getIsVerified();
-	std::string getNickName();
-	std::string getUserName();
-	bool getPassword();
-	int getFd();
+	bool getIsVerified() const;
+	std::string getNickName() const;
+	std::string getUserName() const;
+	bool getPassword() const;
+	int getFd() const;
 
 };

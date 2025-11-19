@@ -7,6 +7,8 @@
 #include <poll.h>
 #include <signal.h>
 
+#include "irc.hpp"
+
 #define PORT 6667
 #define MAX_CLIENTS 10
 
@@ -67,6 +69,8 @@ int main()
 
 	char buffer[1024];
 
+	std::vector<User> uservect;
+
 	while (true)
 	{
 		int poll_count = poll(&fds[0], fds.size(), -1);
@@ -89,6 +93,7 @@ int main()
 						std::cout << "New client connected (fd=" << new_fd << ")\n";
 						fds.push_back((pollfd){ new_fd, POLLIN, 0 });
 						//qui creare anche oggetto utente con solo l'fd dentro;
+						uservect.push_back(User(new_fd));//non so se puo andare fatto cosi
 					}
 				}
 				// b) Client socket → incoming message
@@ -96,18 +101,27 @@ int main()
 				{
 					std::memset(buffer, 0, sizeof(buffer));
 					ssize_t bytes = recv(fds[i].fd, buffer, sizeof(buffer) - 1, 0);
-					if (bytes <= 0)
+					if (bytes <= 0)//dufferenziare < 0 e == 0
 					{
 						std::cout << "Client disconnected (fd=" << fds[i].fd << ")\n";
 						close(fds[i].fd);
 						fds.erase(fds.begin() + i);
+						//cancellare oggetto utente e levarlo da tutti i gruppi
 						--i;
 					}
 					else
 					{
-						std::cout << "Client " << fds[i].fd << ": " << buffer;
-						std::string reply = "Server received: " + std::string(buffer);
-						send(fds[i].fd, reply.c_str(), reply.size(), 0);
+						//std::cout << "Client " << fds[i].fd << ": " << buffer;
+						
+						if (buffer[0] == 'P')
+							execPass(&buffer[2], fds[i].fd, uservect);
+						else if (buffer[0] == 'N')
+							execNick(&buffer[2], fds[i].fd, uservect);
+						else if (buffer[0] == 'U')
+							execUser(&buffer[2], fds[i].fd, uservect);
+						
+						//std::string reply = "Server received: " + std::string(buffer);
+						//send(fds[i].fd, reply.c_str(), reply.size(), 0);
 					}
 				}
 			}

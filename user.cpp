@@ -19,27 +19,33 @@ void User::setUserName(std::string & newusername)
 {
 	this->username = newusername;
 }
-std::string User::getNickName()
+
+void User::setIsVerified()
+{
+	this->isverified = true;
+}
+
+std::string User::getNickName() const
 {
 	return this->nickname;
 }
 
-std::string User::getUserName()
+std::string User::getUserName() const
 {
 	return this->username;
 }
 
-bool User::getPassword()
+bool User::getPassword() const
 {
 	return this->hasputpassword;
 }
 
-bool User::getIsVerified()
+bool User::getIsVerified() const
 {
 	return this->isverified;
 }
 
-int User::getFd()
+int User::getFd() const
 {
 	return this->fd;
 }
