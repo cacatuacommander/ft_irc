@@ -125,7 +125,7 @@ int main(int argc, char** argv)
 								std::cout << it->c_str();
 							}
 							std::cout << "trailing: " << cmd.trailing << "valid: " << cmd.valid << std::endl;
-							exec_command(cmd, uservect, fds[i].fd, password);
+							//exec_command(cmd, uservect, fds[i].fd, password);
 						}
 
 						
