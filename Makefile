@@ -8,6 +8,9 @@ SRC =	server_mod.cpp \
 		user.cpp \
 		utils.cpp \
 		Parser.cpp \
+		commands/nick.cpp \
+		commands/pass.cpp \
+		commands/usr.cpp \
 
 all: $(NAME)
 

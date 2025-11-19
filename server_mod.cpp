@@ -12,7 +12,7 @@
 // }
 
 
-int main()
+int main(int argc, char** argv)
 {
 	int server_fd;
 	struct sockaddr_in address;
@@ -24,6 +24,10 @@ int main()
     sigemptyset(&sa.sa_mask);
     sa.sa_flags = 0;
     sigaction(SIGINT, &sa, NULL); */
+
+	if (argc < 2 )
+		std::cerr << "missing argument password neede" << std::endl;
+	std::string password = argv[1];
 
 
 
@@ -84,8 +88,7 @@ int main()
 					{
 						std::cout << "New client connected (fd=" << new_fd << ")\n";
 						fds.push_back((pollfd){ new_fd, POLLIN, 0 });
-						//qui creare anche oggetto utente con solo l'fd dentro;
-						uservect.push_back(User(new_fd));//non so se puo andare fatto cosi
+						uservect.push_back(User(new_fd));
 					}
 				}
 				// b) Client socket → incoming message
@@ -93,7 +96,7 @@ int main()
 				{
 					std::memset(buffer, 0, sizeof(buffer));
 					ssize_t bytes = recv(fds[i].fd, buffer, sizeof(buffer) - 1, 0);
-					if (bytes <= 0)//dufferenziare < 0 e == 0
+					if (bytes <= 0)//differenziare < 0 e == 0
 					{
 						std::cout << "Client disconnected (fd=" << fds[i].fd << ")\n";
 						close(fds[i].fd);
@@ -122,7 +125,7 @@ int main()
 								std::cout << it->c_str();
 							}
 							std::cout << "trailing: " << cmd.trailing << "valid: " << cmd.valid << std::endl;
-							//exec_command(cmd, uservect, fds[i].fd);
+							exec_command(cmd, uservect, fds[i].fd, password);
 						}
 
 						
