@@ -1,11 +1,3 @@
-#include <iostream>
-#include <vector>
-#include <cstring>
-#include <cstdlib>
-#include <unistd.h>
-#include <arpa/inet.h>
-#include <poll.h>
-#include <signal.h>
 
 #include "irc.hpp"
 
@@ -113,12 +105,26 @@ int main()
 					{
 						//std::cout << "Client " << fds[i].fd << ": " << buffer;
 						
-						if (buffer[0] == 'P')
+						/* if (buffer[0] == 'P')
 							execPass(&buffer[2], fds[i].fd, uservect);
 						else if (buffer[0] == 'N')
 							execNick(&buffer[2], fds[i].fd, uservect);
 						else if (buffer[0] == 'U')
-							execUser(&buffer[2], fds[i].fd, uservect);
+							execUser(&buffer[2], fds[i].fd, uservect); */
+						std::cout << "buffer: " << buffer;
+						Command cmd = Parser::parse(buffer, uservect, fds[i].fd);
+						//if (cmd.valid == true)
+						{
+							std::cout << "name: " << cmd.name << "params: "; 
+							std::vector<std::string>::iterator it;
+							for (it = cmd.params.begin(); it != cmd.params.end(); ++it)
+							{
+								std::cout << it->c_str();
+							}
+							std::cout << "trailing: " << cmd.trailing << "valid: " << cmd.valid << std::endl;
+							//exec_command(cmd, uservect, fds[i].fd);
+						}
+
 						
 						//std::string reply = "Server received: " + std::string(buffer);
 						//send(fds[i].fd, reply.c_str(), reply.size(), 0);

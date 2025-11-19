@@ -1,4 +1,5 @@
 #include "Parser.hpp"
+#include "irc.hpp"
 #include <sstream>
 
 bool Parser::cmd_exist(const std::string& cmd) {
@@ -21,7 +22,7 @@ std::vector<User>::const_iterator userResearch(int fd, const std::vector<User>& 
     return usr_vec.end();
 }
 
-Parser::Command Parser::parse(const std::string& input, const std::vector<User>& usr_vec, const int fd) {
+Command Parser::parse(const std::string& input, const std::vector<User>& usr_vec, const int fd) {
     Command cmd;
     cmd.valid = false;
     std::string tmp = input;
@@ -48,8 +49,8 @@ Parser::Command Parser::parse(const std::string& input, const std::vector<User>&
             return cmd;
         if (tmpCmd == "NICK") {
             if (!curr_usr->getPassword()) {
-                std::string msg = ":server 451 " + curr_usr->getNick() + " NICK :You have not registered\r\n";
-    send(fd, msg.c_str(), msg.size(), 0);
+                std::string msg = ":server 451 " + curr_usr->getNickName() + " NICK :You have not registered\r\n";
+                send(fd, msg.c_str(), msg.size(), 0);
                 return cmd;
             }
         }
@@ -60,7 +61,7 @@ Parser::Command Parser::parse(const std::string& input, const std::vector<User>&
             }
         }
         else {
-            if (curr_usr->getUserName() == "")
+            if (curr_usr->getUserName() == "" && tmpCmd != "PASS")
                 return cmd;
         }
     }

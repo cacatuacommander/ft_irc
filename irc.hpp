@@ -1,12 +1,17 @@
 
-#include "user.hpp"
 #include <vector>
 #include <string>
+
+#include <iostream>
+#include <cstring>
+#include <cstdlib>
 
 #include <unistd.h>
 #include <arpa/inet.h>
 #include <poll.h>
 #include <signal.h>
+
+#include "Parser.hpp"
 
 #define SERVER_NAME "our.server.irc"
 

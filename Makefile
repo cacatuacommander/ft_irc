@@ -7,6 +7,7 @@ SRC =	server_mod.cpp \
 		autentication.cpp \
 		user.cpp \
 		utils.cpp \
+		Parser.cpp \
 
 all: $(NAME)
 

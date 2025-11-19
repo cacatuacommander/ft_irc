@@ -76,7 +76,7 @@ void execNick(std::string newnickname, int fd, std::vector<User> & uservect)
 	}
 }
 
-bool usernameAlredySet(std::vector<User>::iterator it, int fd, std::string & newnickname)
+bool usernameAlredySet(std::vector<User>::iterator it, int fd)
 {
 	if (it->getIsVerified())
 	{
@@ -84,6 +84,7 @@ bool usernameAlredySet(std::vector<User>::iterator it, int fd, std::string & new
 		send(fd, reply.c_str(), reply.size(), 0);
 		return true;
 	}
+	return false;
 }
 
 void execUser(std::string newusername, int fd, std::vector<User> & uservect)
@@ -92,7 +93,7 @@ void execUser(std::string newusername, int fd, std::vector<User> & uservect)
 
 	if (it != uservect.end())
 	{
-		if (usernameAlredySet(it, fd, newusername))
+		if (usernameAlredySet(it, fd))
 			return ;
 		it->setUserName(newusername);
 		it->setIsVerified();
