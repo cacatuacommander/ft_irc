@@ -3,7 +3,10 @@ NAME = provaa
 CXX = c++
 CXXFLAGS = -Wall -Wextra -Werror -std=c++98
 
-SRC = server.cpp \
+SRC =	server_mod.cpp \
+		autentication.cpp \
+		user.cpp \
+		utils.cpp \
 
 all: $(NAME)
 
