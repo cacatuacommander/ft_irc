@@ -1,5 +1,5 @@
 
-#include "irc.hpp"
+#include "../irc.hpp"
 
 bool isValidNickname(std::string newnickname, int fd, std::string & oldnick)
 {

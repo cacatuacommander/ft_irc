@@ -2,7 +2,7 @@
 #include "irc.hpp"
 #include <iostream>
 
-bool argumentsArePresent(Command cmd, int numbofargneeded)
+bool argumentsArePresent(Command cmd, unsigned int numbofargneeded)
 {
 	unsigned int argsn = cmd.params.size();
 	if (!cmd.trailing.empty())

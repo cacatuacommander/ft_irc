@@ -1,7 +1,7 @@
 
 #include "irc.hpp"
 
-std::vector<User>::iterator searchVectWithFd(std::vector<User> uservect, int fd)
+std::vector<User>::iterator searchVectWithFd(std::vector<User> & uservect, int fd)//da farla che ritorna index invece di un iterator che e piu sicuro
 {
 	std::vector<User>::iterator it;
 	for (it = uservect.begin(); it != uservect.end(); ++it)
@@ -18,7 +18,7 @@ std::vector<User>::iterator searchVectWithFd(std::vector<User> uservect, int fd)
 	return it;
 }
 
-std::vector<User>::iterator searchVectWithNick(std::vector<User> uservect, std::string nickname)
+std::vector<User>::iterator searchVectWithNick(std::vector<User> & uservect, std::string nickname)//da farla che ritorna index invece di un iterator che e piu sicuro
 {
 	std::vector<User>::iterator it;
 	for (it = uservect.begin(); it != uservect.end(); ++it)

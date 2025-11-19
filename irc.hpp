@@ -15,9 +15,9 @@
 
 #define SERVER_NAME "our.server.irc"
 
-std::vector<User>::iterator searchVectWithFd(std::vector<User> uservect, int fd);
-std::vector<User>::iterator searchVectWithNick(std::vector<User> uservect, std::string nickname);
-bool argumentsArePresent(Command cmd, int numbofargneeded);
+std::vector<User>::iterator searchVectWithFd(std::vector<User> & uservect, int fd);
+std::vector<User>::iterator searchVectWithNick(std::vector<User> & uservect, std::string nickname);
+bool argumentsArePresent(Command cmd, unsigned int numbofargneeded);
 
 void execNick(Command cmd, int fd, std::vector<User> & uservect);
 void execUser(Command cmd, int fd, std::vector<User> & uservect);

@@ -1,4 +1,5 @@
-#include "irc.hpp"
+
+#include "../irc.hpp"
 
 bool usernameAlredySet(std::vector<User>::iterator it, int fd)
 {

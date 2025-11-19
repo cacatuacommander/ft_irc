@@ -12,7 +12,7 @@
 // }
 
 
-int main(int argc, char** argv)
+int main(/* int argc, char** argv */)
 {
 	int server_fd;
 	struct sockaddr_in address;
@@ -25,11 +25,12 @@ int main(int argc, char** argv)
     sa.sa_flags = 0;
     sigaction(SIGINT, &sa, NULL); */
 
-	if (argc < 2 )
-		std::cerr << "missing argument password neede" << std::endl;
-	std::string password = argv[1];
-
-
+/* 	if (argc < 2 )
+	{
+		std::cerr << "missing argument password needed" << std::endl;
+		return 0;
+	}
+	std::string password = argv[1]; */
 
 	server_fd = socket(AF_INET, SOCK_STREAM, 0);
 	if (server_fd < 0)
@@ -116,7 +117,7 @@ int main(int argc, char** argv)
 							execUser(&buffer[2], fds[i].fd, uservect); */
 						std::cout << "buffer: " << buffer;
 						Command cmd = Parser::parse(buffer, uservect, fds[i].fd);
-						//if (cmd.valid == true)
+						if (cmd.valid == true)
 						{
 							std::cout << "name: " << cmd.name << "params: "; 
 							std::vector<std::string>::iterator it;

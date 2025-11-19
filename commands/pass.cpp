@@ -1,4 +1,5 @@
-#include "irc.hpp"
+
+#include "../irc.hpp"
 
 void execPass(Command cmd, int fd, std::vector<User> & uservect, std::string realpassword)
 {
