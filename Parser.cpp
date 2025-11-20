@@ -1,5 +1,4 @@
 #include "Parser.hpp"
-#include "irc.hpp"
 #include <sstream>
 
 bool Parser::cmd_exist(const std::string& cmd) {
@@ -22,13 +21,21 @@ std::vector<User>::const_iterator userResearch(int fd, const std::vector<User>& 
     return usr_vec.end();
 }
 
-Command Parser::parse(const std::string& input, const std::vector<User>& usr_vec, const int fd) {
+Parser::Command Parser::parse(const std::string& input, const std::vector<User>& usr_vec, const int fd) {
     Command cmd;
     cmd.valid = false;
     std::string tmp = input;
 
-    if (tmp.size() < 4 || tmp[tmp.size() - 1] != '\n' || tmp[tmp.size() - 2] != '\r')
+    std::vector<User>::const_iterator curr_usr = userResearch(fd, usr_vec);
+    if (curr_usr == usr_vec.end())
         return cmd;
+
+    std::string nick = curr_usr->getNickname().empty() ? "*" : curr_usr->getNickname();
+    if (tmp.size() < 4 || tmp[tmp.size() - 1] != '\n' || tmp[tmp.size() - 2] != '\r') {
+        std::string err = ":" + SERVER_NAME + " 421 " + nick + " :Unknown command\r\n";
+    	send(fd, err.c_str(), err.size(), 0);
+        return cmd;
+    }
     else
         tmp.erase(tmp.size()-2, 2);
 
@@ -49,20 +56,24 @@ Command Parser::parse(const std::string& input, const std::vector<User>& usr_vec
             return cmd;
         if (tmpCmd == "NICK") {
             if (!curr_usr->getPassword()) {
-                std::string msg = ":server 451 " + curr_usr->getNickName() + " NICK :You have not registered\r\n";
+                std::string msg = ":" + SERVER_NAME + " 451 * :You have not registered\r\n";
                 send(fd, msg.c_str(), msg.size(), 0);
                 return cmd;
             }
         }
         else if (tmpCmd == "USER") {
             if (curr_usr->getPassword() == false || curr_usr->getNickName() == "") {
-                // errore da dare per assenza di pass e/o di nick
+                std::string msg = ":" + SERVER_NAME + " 451 * :You have not registered\r\n";
+		        send(fd, msg.c_str(), msg.size(), 0);
                 return cmd;
             }
         }
         else {
-            if (curr_usr->getUserName() == "" && tmpCmd != "PASS")
+            if (curr_usr->getUserName() == "" && tmpCmd != "PING / PONG" && tmpCmd != "QUIT") {
+                std::string msg = ":" + SERVER_NAME + " 451 " + nick + " :You have not registered\r\n";
+		        send(fd, msg.c_str(), msg.size(), 0);
                 return cmd;
+            }
         }
     }
 
