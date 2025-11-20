@@ -1,11 +1,10 @@
-
 #include "../irc.hpp"
 
-bool usernameAlredySet(std::vector<User>::iterator it, int fd)
+bool usernameAlredySet(int i, std::vector<User> & uservect, int fd)
 {
-	if (it->getIsVerified())
+	if (uservect[i].getIsVerified())
 	{
-		std::string reply = std::string(SERVER_NAME) + std::string(" 462 ") + it->getNickName() + " :You may not reregister\r\n";
+		std::string reply = std::string(SERVER_NAME) + std::string(" 462 ") + uservect[i].getNickName() + " :You may not reregister\r\n";
 		send(fd, reply.c_str(), reply.size(), 0);
 		return true;
 	}
@@ -14,7 +13,9 @@ bool usernameAlredySet(std::vector<User>::iterator it, int fd)
 
 void execUser(Command cmd, int fd, std::vector<User> & uservect)
 {
-	if (!argumentsArePresent(cmd, 1))
+	size_t i = searchVectWithFd(uservect, fd);
+
+	if (!argumentsArePresent(cmd, 1, uservect[i].getNickName(), fd))
 		return ;
 
 	std::string newusername;
@@ -22,15 +23,14 @@ void execUser(Command cmd, int fd, std::vector<User> & uservect)
 		newusername = cmd.params[1];
 	else
 		newusername = cmd.trailing;
-	std::vector<User>::iterator it = searchVectWithFd(uservect, fd);
 
-	if (it != uservect.end())
+	if (i < uservect.size())
 	{
-		if (usernameAlredySet(it, fd))
+		if (usernameAlredySet(i, uservect, fd))
 			return ;
-		it->setUserName(newusername);
-		it->setIsVerified();
-		//
+		uservect[i].setUserName(newusername);
+		uservect[i].setIsVerified();
+		//fare tutti i send di benvenuto
 		//std::cout << "user aggiornato a:" << newusername << std::endl;
 	}
 	else

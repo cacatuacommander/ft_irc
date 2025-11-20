@@ -1,40 +1,40 @@
-
 #include "../irc.hpp"
 
 void execPass(Command cmd, int fd, std::vector<User> & uservect, std::string realpassword)
 {
-	if (!argumentsArePresent(cmd, 1))
+	size_t i = searchVectWithFd(uservect, fd);
+
+	if (!argumentsArePresent(cmd, 1, uservect[i].getNickName(), fd))//Command cmd, unsigned int numbofargneeded, std::string nickname, int fd
 		return ;
+	
 
 	std::string newpassword;
 	if(cmd.params.size() > 0)
-		newpassword = cmd.params[1];
+		{newpassword = cmd.params[0]; /* std::cerr << "ciaoo122" << std::endl; */}
 	else
-		newpassword = cmd.trailing;
-
-	std::vector<User>::iterator it = searchVectWithFd(uservect, fd);
-
-	if (it != uservect.end())
+		{newpassword = cmd.trailing;}
+	
+	if (i < uservect.size())
 	{
-		if(!it->getPassword())
-		{	
+		if(!uservect[i].getPassword())
+		{		/* std::cout << "ciaoo3" << std::endl; */
 			if (newpassword == realpassword)
-				it->setPassword();
+				uservect[i].setPassword();
 			else
 			{
 				std::string reply = std::string(SERVER_NAME) + std::string(" 464 ") + "*" + " :Password incorrect\r\n";
 				send(fd, reply.c_str(), reply.size(), 0);
-			}	
+			}		//std::cout << "ciaoo4" << std::endl;
 			//std::cout << "psw aggiornata a:" << newpassword << std::endl;
 		}
 		else
-		{
-			std::string temp = it->getNickName();
+		{	//std::cout << "ciaoo5" << std::endl;
+			std::string temp = uservect[i].getNickName();
 			if (temp == "")
 				temp = "*";
 			std::string reply = std::string(SERVER_NAME) + std::string(" 462 ") + temp + " :You may not reregister\r\n";
 			send(fd, reply.c_str(), reply.size(), 0);
-		}
+		}	//std::cout << "ciaoo6" << std::endl;
 	}
 	else
 	{

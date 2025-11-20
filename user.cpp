@@ -1,6 +1,6 @@
 
 #include "user.hpp"
-#include <iostream>
+
 User::User(int newFd) : nickname(""), username (""), hasputpassword(false), fd(newFd), isverified(false) {}
 
 User::~User() {}

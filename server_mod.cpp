@@ -12,7 +12,7 @@
 // }
 
 
-int main(/* int argc, char** argv */)
+int main(int argc, char** argv)
 {
 	int server_fd;
 	struct sockaddr_in address;
@@ -25,12 +25,15 @@ int main(/* int argc, char** argv */)
     sa.sa_flags = 0;
     sigaction(SIGINT, &sa, NULL); */
 
-/* 	if (argc < 2 )
+	if (argc < 2 )
 	{
 		std::cerr << "missing argument password needed" << std::endl;
 		return 0;
 	}
-	std::string password = argv[1]; */
+
+	std::string password = argv[1];
+
+
 
 	server_fd = socket(AF_INET, SOCK_STREAM, 0);
 	if (server_fd < 0)
@@ -109,23 +112,35 @@ int main(/* int argc, char** argv */)
 					{
 						//std::cout << "Client " << fds[i].fd << ": " << buffer;
 						
-						/* if (buffer[0] == 'P')
-							execPass(&buffer[2], fds[i].fd, uservect);
-						else if (buffer[0] == 'N')
-							execNick(&buffer[2], fds[i].fd, uservect);
-						else if (buffer[0] == 'U')
-							execUser(&buffer[2], fds[i].fd, uservect); */
-						std::cout << "buffer: " << buffer;
+						
+						std::cout << "buffer: " << buffer << std::endl;
 						Command cmd = Parser::parse(buffer, uservect, fds[i].fd);
 						if (cmd.valid == true)
 						{
-							std::cout << "name: " << cmd.name << "params: "; 
+							std::cout << " name: " << cmd.name << " params: "; 
 							std::vector<std::string>::iterator it;
 							for (it = cmd.params.begin(); it != cmd.params.end(); ++it)
 							{
 								std::cout << it->c_str();
 							}
-							std::cout << "trailing: " << cmd.trailing << "valid: " << cmd.valid << std::endl;
+							std::cout << " trailing: " << cmd.trailing << " valid: " << cmd.valid << std::endl;
+							
+							int index = searchVectWithFd(uservect, fds[i].fd);
+							std::cerr << "fd: " << uservect[index].getFd() <<  std::endl;
+							std::cerr << "nick: " << uservect[index].getNickName() <<  std::endl;
+							std::cerr << "user: " << uservect[index].getUserName() <<  std::endl;
+							std::cerr << "password: " << uservect[index].getPassword() <<  std::endl; 
+
+						/* 	Command cmd;
+							cmd.name = buffer;
+							cmd.params[0] = buffer;
+							cmd.valid = true;
+							if (buffer[0] == 'P')
+								{std::cout << "aaa" << std::endl; execPass(cmd, fds[i].fd, uservect, password);}
+							else if (buffer[0] == 'N')
+								execNick(cmd, fds[i].fd, uservect);
+							else if (buffer[0] == 'U')
+								execUser(cmd, fds[i].fd, uservect); */
 							//exec_command(cmd, uservect, fds[i].fd, password);
 						}
 

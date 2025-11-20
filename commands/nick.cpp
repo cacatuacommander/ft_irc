@@ -42,8 +42,8 @@ bool isValidNickname(std::string newnickname, int fd, std::string & oldnick)
 
 bool nicknameAlredyInUse(std::string newnickname, int fd, std::vector<User> & uservect, std::string & oldnick)
 {
-	std::vector<User>::iterator it = searchVectWithNick(uservect, newnickname);
-	if (it != uservect.end())
+	size_t i = searchVectWithNick(uservect, newnickname);
+	if (i < uservect.size())
 	{
 		std::string reply = std::string(SERVER_NAME) + std::string(" 433 ") + oldnick + " " + newnickname + " :Nickname is already in use\r\n";
 		send(fd, reply.c_str(), reply.size(), 0);
@@ -54,20 +54,21 @@ bool nicknameAlredyInUse(std::string newnickname, int fd, std::vector<User> & us
 
 void execNick(Command cmd, int fd, std::vector<User> & uservect)
 {
-	if (!argumentsArePresent(cmd, 1))
+	size_t i = searchVectWithFd(uservect, fd);
+
+	if (!argumentsArePresent(cmd, 1, uservect[i].getNickName(), fd))
 		return ;
 
+	std:: cout << "aaa" << std::endl;
 	std::string newnickname;
 	if(cmd.params.size() > 0)
 		newnickname = cmd.params[1];
 	else
 		newnickname = cmd.trailing;
-
-	std::vector<User>::iterator it = searchVectWithFd(uservect, fd);
 	
-	if (it != uservect.end())
+	if (i < uservect.size())
 	{
-		std::string oldnick = it->getNickName();
+		std::string oldnick = uservect[i].getNickName();
 		if (oldnick == "")
 			oldnick = "*";
 
@@ -75,7 +76,7 @@ void execNick(Command cmd, int fd, std::vector<User> & uservect)
 			return ;
 		if (nicknameAlredyInUse(newnickname, fd, uservect, oldnick))
 			return ;
-		it->setNickName(newnickname);
+		uservect[i].setNickName(newnickname);
 		//std::cout << "nick aggiornato a:" << newnickname << std::endl;
 	}
 	else
