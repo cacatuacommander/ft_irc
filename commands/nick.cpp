@@ -59,10 +59,9 @@ void execNick(Command cmd, int fd, std::vector<User> & uservect)
 	if (!argumentsArePresent(cmd, 1, uservect[i].getNickName(), fd))
 		return ;
 
-	std:: cout << "aaa" << std::endl;
 	std::string newnickname;
 	if(cmd.params.size() > 0)
-		newnickname = cmd.params[1];
+		newnickname = cmd.params[0];
 	else
 		newnickname = cmd.trailing;
 	

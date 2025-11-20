@@ -1,7 +1,7 @@
 
 #include "user.hpp"
 
-User::User(int newFd) : nickname(""), username (""), hasputpassword(false), fd(newFd), isverified(false) {}
+User::User(int newFd) : nickname(""), username (""), hasputpassword(false), fd(newFd), isverified(false), buffer(""){}
 
 User::~User() {}
 
@@ -20,6 +20,11 @@ void User::setUserName(std::string & newusername)
 	this->username = newusername;
 }
 
+void User::setRealName(std::string & newrealname)
+{
+	this->realname = newrealname;
+}
+
 void User::setIsVerified()
 {
 	this->isverified = true;
@@ -33,6 +38,11 @@ std::string User::getNickName() const
 std::string User::getUserName() const
 {
 	return this->username;
+}
+
+std::string User::getRealName() const
+{
+	return this->realname;
 }
 
 bool User::getPassword() const

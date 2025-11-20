@@ -112,38 +112,49 @@ int main(int argc, char** argv)
 					{
 						//std::cout << "Client " << fds[i].fd << ": " << buffer;
 						
-						
-						std::cout << "buffer: " << buffer << std::endl;
-						Command cmd = Parser::parse(buffer, uservect, fds[i].fd);
-						if (cmd.valid == true)
+						//std::cout << "\nbuffer: " << buffer << std::endl;
+
+						int index = searchVectWithFd(uservect, fds[i].fd);
+
+						uservect[index].buffer.append(buffer, bytes);
+						size_t pos;
+						while ((pos = uservect[index].buffer.find("\r\n")) != std::string::npos)
 						{
-							std::cout << " name: " << cmd.name << " params: "; 
-							std::vector<std::string>::iterator it;
-							for (it = cmd.params.begin(); it != cmd.params.end(); ++it)
+							std::string line = uservect[index].buffer.substr(0, pos);
+							uservect[index].buffer.erase(0, pos + 2);
+							//fare controllo che line non sia piu di 512(?)
+							std::cout << "\nline: " << line << std::endl;
+							Command cmd = Parser::parse(line, uservect, fds[i].fd);
+							if ( cmd.valid == true)
 							{
-								std::cout << it->c_str();
+								/* std::cout << " name: " << cmd.name << " params: "; 
+								std::vector<std::string>::iterator it;
+								for (it = cmd.params.begin(); it != cmd.params.end(); ++it)
+								{
+									std::cout << it->c_str();
+								}
+								std::cout << " trailing: " << cmd.trailing << " valid: " << cmd.valid << std::endl; */
+								
+								
+								std::cerr << "\nfd: " << uservect[index].getFd() <<  std::endl;
+								std::cerr << "nick: " << uservect[index].getNickName() <<  std::endl;
+								std::cerr << "user: " << uservect[index].getUserName() <<  std::endl;
+								std::cerr << "password: " << uservect[index].getPassword() <<  std::endl; 
+
+/* 								Command cmd;
+								cmd.name = line;
+								cmd.params.push_back(line.substr(2, password.size()));
+								cmd.valid = true;
+								
+								if (line[0] == 'P')
+									execPass(cmd, fds[i].fd, uservect, password);
+								else if (line[0] == 'N')
+									execNick(cmd, fds[i].fd, uservect);
+								else if (line[0] == 'U')
+									execUser(cmd, fds[i].fd, uservect); */
+								exec_command(cmd, uservect, fds[i].fd, password);
 							}
-							std::cout << " trailing: " << cmd.trailing << " valid: " << cmd.valid << std::endl;
-							
-							int index = searchVectWithFd(uservect, fds[i].fd);
-							std::cerr << "fd: " << uservect[index].getFd() <<  std::endl;
-							std::cerr << "nick: " << uservect[index].getNickName() <<  std::endl;
-							std::cerr << "user: " << uservect[index].getUserName() <<  std::endl;
-							std::cerr << "password: " << uservect[index].getPassword() <<  std::endl; 
-
-						/* 	Command cmd;
-							cmd.name = buffer;
-							cmd.params[0] = buffer;
-							cmd.valid = true;
-							if (buffer[0] == 'P')
-								{std::cout << "aaa" << std::endl; execPass(cmd, fds[i].fd, uservect, password);}
-							else if (buffer[0] == 'N')
-								execNick(cmd, fds[i].fd, uservect);
-							else if (buffer[0] == 'U')
-								execUser(cmd, fds[i].fd, uservect); */
-							//exec_command(cmd, uservect, fds[i].fd, password);
 						}
-
 						
 						//std::string reply = "Server received: " + std::string(buffer);
 						//send(fds[i].fd, reply.c_str(), reply.size(), 0);
