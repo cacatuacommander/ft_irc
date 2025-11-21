@@ -30,16 +30,7 @@ Command Parser::parse(const std::string& input, const std::vector<User>& usr_vec
 	if (curr_usr == usr_vec.end())
 		return cmd;
 
-     std::string nick = curr_usr->getNickName().empty() ? "*" : curr_usr->getNickName();
-
-	 //ho commentato questo perche ora lo facciamo fuori quindi non serve piu credo
-/*	if (tmp.size() < 4 || tmp[tmp.size() - 1] != '\n' || tmp[tmp.size() - 2] != '\r') {
-		std::string err = ":" + std::string(SERVER_NAME) + " 421 " + nick + " :Unknown command babo\r\n";
-		send(fd, err.c_str(), err.size(), 0);
-		return cmd;
-	}
-	else
-		tmp.erase(tmp.size()-2, 2); */
+    std::string nick = curr_usr->getNickName().empty() ? "*" : curr_usr->getNickName();
 
 	size_t pos = tmp.find(" :");
 	if (pos != std::string::npos)
@@ -91,3 +82,14 @@ Command Parser::parse(const std::string& input, const std::vector<User>& usr_vec
 	cmd.valid = true;
 	return cmd;
 }
+
+
+
+	 //ho commentato questo perche ora lo facciamo fuori quindi non serve piu credo
+/*	if (tmp.size() < 4 || tmp[tmp.size() - 1] != '\n' || tmp[tmp.size() - 2] != '\r') {
+		std::string err = ":" + std::string(SERVER_NAME) + " 421 " + nick + " :Unknown command babo\r\n";
+		send(fd, err.c_str(), err.size(), 0);
+		return cmd;
+	}
+	else
+		tmp.erase(tmp.size()-2, 2); */

@@ -1,0 +1,38 @@
+#include "../irc.hpp"
+
+bool checkParamsPrvMsg(const Command &cmd, const std::string &nick, int fd, const std::vector<User> &uservect) {
+    if (cmd.params.size() < 1)
+    {
+        std::string msg = ":" + std::string(SERVER_NAME) + " 411 " + nick + " :No recipient given (PRIVMSG)\r\n";
+        send(fd, msg.c_str(), msg.size(), 0);
+        return false;
+    }
+    if (cmd.trailing.empty())
+    {
+        std::string msg = ":" + std::string(SERVER_NAME) + " 412 " + nick + " :No text to send\r\n";
+        send(fd, msg.c_str(), msg.size(), 0);
+        return false;
+    }
+
+    std::string target = cmd.params[0];
+    if (target[0] != '#')
+    {
+        int ir = searchVectWithNick(uservect, target);
+        if (ir == uservect.size())
+        {
+            std::string msg = ":" + std::string(SERVER_NAME) + " 401 " + nick + " " + target + " :No such nick/channel\r\n";
+            send(fd, msg.c_str(), msg.size(), 0);
+            return false;
+        }
+    }
+    return true;
+}
+
+
+void execPrivMsg(Command cmd, int fd, std::vector<User> & uservect) {
+    int is = searchVectWithFd(uservect, fd);
+    std::string nick = uservect[is].getNickName().empty() ? "*" : uservect[is].getNickName();
+    if (!checkParamsPrvMsg(cmd, nick, fd, uservect))
+        return ;
+
+}

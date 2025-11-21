@@ -27,4 +27,6 @@ void exec_command(Command cmd, std::vector<User> & uservect, int fd, std::string
 		execNick(cmd, fd, uservect);
 	if (cmd.name == "USER")
 		execUser(cmd, fd, uservect);
+	if (cmd.name == "PRIVMSG")
+		execPrivMsg(cmd, fd, uservect);
 }
