@@ -13,7 +13,11 @@
 
 #include "Parser.hpp"
 
-#define SERVER_NAME "our.server.irc"
+#define SERVER_NAME ":our.server.irc"
+
+#define SERVER_CREATION_DATE "Mon Nov 11 2024"
+
+const std::string SERVER_VERSION = "our_ft_irc-1.0";
 
 size_t searchVectWithFd(std::vector<User> & uservect, int fd);
 size_t searchVectWithNick(std::vector<User> & uservect, std::string nickname);

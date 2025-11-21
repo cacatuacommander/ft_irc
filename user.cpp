@@ -1,7 +1,7 @@
 
 #include "user.hpp"
 
-User::User(int newFd) : nickname(""), username (""), hasputpassword(false), fd(newFd), isverified(false), buffer(""){}
+User::User(int newFd, std::string newip) : nickname(""), username (""), ip(newip), hasputpassword(false), fd(newFd), isverified(false), buffer("") {}
 
 User::~User() {}
 
@@ -43,6 +43,11 @@ std::string User::getUserName() const
 std::string User::getRealName() const
 {
 	return this->realname;
+}
+
+std::string User::getIp() const
+{
+	return this->ip;
 }
 
 bool User::getPassword() const

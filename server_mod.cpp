@@ -11,7 +11,6 @@
 //     g_running = false;
 // }
 
-
 int main(int argc, char** argv)
 {
 	int server_fd;
@@ -32,8 +31,6 @@ int main(int argc, char** argv)
 	}
 
 	std::string password = argv[1];
-
-
 
 	server_fd = socket(AF_INET, SOCK_STREAM, 0);
 	if (server_fd < 0)
@@ -92,7 +89,8 @@ int main(int argc, char** argv)
 					{
 						std::cout << "New client connected (fd=" << new_fd << ")\n";
 						fds.push_back((pollfd){ new_fd, POLLIN, 0 });
-						uservect.push_back(User(new_fd));
+						std::string user_ip = inet_ntoa(address.sin_addr);
+						uservect.push_back(User(new_fd, user_ip));
 					}
 				}
 				// b) Client socket → incoming message
@@ -102,10 +100,13 @@ int main(int argc, char** argv)
 					ssize_t bytes = recv(fds[i].fd, buffer, sizeof(buffer) - 1, 0);
 					if (bytes <= 0)//differenziare < 0 e == 0
 					{
-						std::cout << "Client disconnected (fd=" << fds[i].fd << ")\n";
+						//cancello utente da vettore utenti(da testare)
+						int ind = searchVectWithFd(uservect, fds[i].fd);
+						uservect.erase(uservect.begin() + ind);
+						//levare utente anche da tutti i gruppi
 						close(fds[i].fd);
 						fds.erase(fds.begin() + i);
-						//cancellare oggetto utente e levarlo da tutti i gruppi
+						std::cout << "Client disconnected (fd=" << fds[i].fd << ")\n";
 						--i;
 					}
 					else
