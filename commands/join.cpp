@@ -1,5 +1,5 @@
 
-#include "irc.hpp"
+#include "../irc.hpp"
 
 bool channelNameIsInvalid(Command cmd, int fd, std::string & channelname, std::string nickname)
 {
@@ -15,7 +15,7 @@ bool channelNameIsInvalid(Command cmd, int fd, std::string & channelname, std::s
 		send(fd, reply.c_str(), reply.size(), 0);
 		return true;	
 	}
-	int i = 0;
+	size_t i = 0;
 	while (i < channelname.size())
 	{
 		if (channelname[i] < 33 || channelname[i] == ',' || channelname[i] == ':')
@@ -36,7 +36,7 @@ bool userAlredyPresent(int fd, std::vector<Channel> & channelvect, size_t ch_i)
 	return false;
 }
 
-bool addUserToChannel(Command & cmd, std::string & nickname, std::string & channelname, int fd, std::vector<Channel> & channelvect, size_t ch_i)
+void addUserToChannel(Command & cmd, std::string & nickname, std::string & channelname, int fd, std::vector<Channel> & channelvect, size_t ch_i)
 {
 	if (channelvect[ch_i].needsInvite())
 	{
@@ -92,7 +92,7 @@ bool addUserToChannel(Command & cmd, std::string & nickname, std::string & chann
 	//Inviare agli altri utenti del canale un messaggio di JOIN dell’utente entrato
 }
 
-void execjoin(Command cmd, int fd, std::vector<User> & uservect, std::vector<Channel> & channelvect) 
+void execJoin(Command cmd, int fd, std::vector<User> & uservect, std::vector<Channel> & channelvect)
 {
 	size_t i = searchVectWithFd(uservect, fd);
 	std::string nickname = uservect[i].getNickName();

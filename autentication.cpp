@@ -28,5 +28,7 @@ void exec_command(Command cmd, std::vector<User> & uservect, std::vector<Channel
 	if (cmd.name == "USER")
 		execUser(cmd, fd, uservect);
 	if (cmd.name == "JOIN")
-		execJoin(cmd, fd, uservect);
+		execJoin(cmd, fd, uservect, channelvect);
+	if (cmd.name == "PRIVMSG")
+		execPrivMsg(cmd, fd, channelvect, uservect);
 }

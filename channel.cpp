@@ -1,7 +1,11 @@
 #include "channel.hpp"
 #include <arpa/inet.h>
 
-Channel::Channel(std::string newuser, std::string channelname) : name(channelname), topic(""), isinviteonly(false), onlyopsmaysettopic(false), password(""), userlimit(-1) {}
+Channel::Channel(int fd, std::string channelname) : name(channelname), topic(""), isinviteonly(false), password(""), userlimit(-1)
+{
+	users.push_back(fd);
+	operators.push_back(fd);
+}
 
 Channel::~Channel() {}
 
