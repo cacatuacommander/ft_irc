@@ -39,11 +39,11 @@ size_t searchVectWithNick(std::vector<User> & uservect, std::string & nickname)/
 	return i;
 }
 
-size_t searchChannel(std::vector<Channel> & chennelvect , std::string & channelname)
+size_t searchChannel(std::vector<Channel> & channelvect, std::string & channelname)
 {
-	std::vector<User>::iterator it;
+	std::vector<Channel>::iterator it;
 	size_t i = 0;
-	for (it = uservect.begin(); it != uservect.end(); ++it)
+	for (it = channelvect.begin(); it != channelvect.end(); ++it)
 	{
 		if (it->getName() == channelname)
 		{

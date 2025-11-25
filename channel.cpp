@@ -1,4 +1,5 @@
 #include "channel.hpp"
+#include <arpa/inet.h>
 
 Channel::Channel(std::string newuser, std::string channelname) : name(channelname), topic(""), isinviteonly(false), onlyopsmaysettopic(false), password(""), userlimit(-1) {}
 
@@ -28,7 +29,7 @@ std::string Channel::getName() const
 	return this->name;
 }
 
-bool Channel::needsInvite() const;
+bool Channel::needsInvite() const
 {
 	return this->isinviteonly;
 }
@@ -38,7 +39,7 @@ bool Channel::needsPass() const
 	return (this->password == "");
 }
 
-bool Channel::userIsInGroup(int fd) const
+bool Channel::userIsInChannel(int fd) const
 {
 	if (this->users.empty())
 		return false;
@@ -69,4 +70,23 @@ bool Channel::reachedUserLimit() const
 	if (this->users.size() >= this->userlimit)
 		return true;
 	return false;
+}
+
+bool Channel::checkPass(std::string & passwordtocheck) const
+{
+	if (passwordtocheck.empty() || passwordtocheck == "")
+		return false;
+	if (this->password == passwordtocheck)
+		return true;
+	return false;
+}
+
+void Channel::sendToAll(std::string message)
+{
+	if (this->users.empty())//controllo che forse non serve
+		return ;
+	for (size_t i = 0; i < users.size(); i++)
+	{
+		send(this->users[i], message.c_str(), message.size(), 0);
+	}
 }

@@ -1,5 +1,6 @@
 
-#include "irc.hpp"
+#include <string>
+#include <vector>
 
 class Channel 
 {
@@ -38,12 +39,15 @@ class Channel
 	std::string getName() const;
  	bool needsInvite() const;
 	bool needsPass() const;
-	bool userIsInGroup(int fd) const;
+	bool userIsInChannel(int fd) const;
 	bool userIsInvited(int fd) const;
 	bool reachedUserLimit() const;
+	;
 /*	std::string getIp() const;
 	bool getPassword() const;
 	int getFd() const;
 	bool getIsVerified() const; */
-
+	
+	bool checkPass(std::string & password) const;
+	void sendToAll(std::string message);
 };

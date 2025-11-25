@@ -154,7 +154,7 @@ int main(int argc, char** argv)
 									execNick(cmd, fds[i].fd, uservect);
 								else if (line[0] == 'U')
 									execUser(cmd, fds[i].fd, uservect); */
-								exec_command(cmd, uservect, fds[i].fd, password);
+								exec_command(cmd, uservect, channelvect, fds[i].fd, password);
 							}
 						}
 						
