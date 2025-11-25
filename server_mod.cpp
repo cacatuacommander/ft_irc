@@ -67,6 +67,7 @@ int main(int argc, char** argv)
 	char buffer[1024];
 
 	std::vector<User> uservect;
+	std::vector<Channel> channelvect;
 
 	while (true)
 	{

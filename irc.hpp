@@ -12,6 +12,7 @@
 #include <signal.h>
 
 #include "Parser.hpp"
+#include "channel.hpp"
 
 #define SERVER_NAME ":our.server.irc"
 
@@ -20,7 +21,9 @@
 const std::string SERVER_VERSION = "our_ft_irc-1.0";
 
 size_t searchVectWithFd(std::vector<User> & uservect, int fd);
-size_t searchVectWithNick(std::vector<User> & uservect, std::string nickname);
+size_t searchVectWithNick(std::vector<User> & uservect, std::string & nickname);
+size_t searchChannel(std::vector<Channel> & chennelvect , std::string & channelname);
+
 bool argumentsArePresent(Command cmd, unsigned int numbofargneeded, std::string nickname, int fd);
 
 void execNick(Command cmd, int fd, std::vector<User> & uservect);
