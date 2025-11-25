@@ -2,6 +2,8 @@
 #include <string>
 #include <vector>
 
+class User;
+
 class Channel 
 {
 	private:
@@ -49,5 +51,5 @@ class Channel
 	
 	bool checkPass(std::string & password) const;
 	void sendToAll(std::string message);
-	std::string getListOfNicks(std::vector<Channel> & channelvect, std::vector<User> & uservect) const;
+	std::string getListOfNicks(std::vector<User> & uservect) const;
 };

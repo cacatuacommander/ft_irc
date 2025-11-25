@@ -1,7 +1,9 @@
 #include "channel.hpp"
-#include "irc.hpp"
+#include "user.hpp"
 #include <arpa/inet.h>
 #include <algorithm>
+
+size_t searchVectWithFd(std::vector<User> & uservect, int fd);
 
 Channel::Channel(int fd, std::string channelname) : name(channelname), topic(""), isinviteonly(false), password(""), userlimit(-1)
 {
@@ -49,7 +51,9 @@ bool Channel::needsInvite() const
 
 bool Channel::needsPass() const
 {
-	return (this->password == "");
+	if (this->password.empty() || this->password == "")
+		return false;
+	return true;
 }
 
 bool Channel::userIsInChannel(int fd) const
@@ -104,7 +108,7 @@ void Channel::sendToAll(std::string message)
 	}
 }
 
-std::string Channel::getListOfNicks(std::vector<Channel> & channelvect, std::vector<User> & uservect) const
+std::string Channel::getListOfNicks(std::vector<User> & uservect) const
 {
 	std::string listofnames = "";
 	if (users.empty())
@@ -113,7 +117,7 @@ std::string Channel::getListOfNicks(std::vector<Channel> & channelvect, std::vec
 	{
 		if (i != 0)
 		listofnames += " ";
-		if (std::find(this->operators.begin(), this->operators.end(), this->users[i]) != this->operators.end());
+		if (std::find(this->operators.begin(), this->operators.end(), this->users[i]) != this->operators.end())
 			listofnames += "@";
 		listofnames += uservect[searchVectWithFd(uservect, this->users[i])].getNickName();
 	}

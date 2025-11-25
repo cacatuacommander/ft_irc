@@ -30,5 +30,5 @@ void execNick(Command cmd, int fd, std::vector<User> & uservect);
 void execUser(Command cmd, int fd, std::vector<User> & uservect);
 void execPrivMsg(Command cmd, int fd, std::vector<Channel>& channelVect, std::vector<User> & uservect);
 void execPass(Command cmd, int fd, std::vector<User> & uservect, std::string realpassword);
-void execJoin(Command cmd, int fd, std::vector<User> & uservect, std::vector<Channel> & channelvect);
+void execJoin(Command & cmd, int fd, std::vector<User> & uservect, std::vector<Channel> & channelvect);
 void exec_command(Command cmd, std::vector<User> & uservect, std::vector<Channel> & userchannel, int fd, std::string serverpassword);
