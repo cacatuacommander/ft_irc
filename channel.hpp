@@ -2,6 +2,8 @@
 #include <string>
 #include <vector>
 
+class User;
+
 class Channel 
 {
 	private:
@@ -13,17 +15,16 @@ class Channel
 		//mettere banmask?
 		
 		bool				isinviteonly;
-		bool				onlyopsmaysettopic;
-//		bool				ispasswordrequired;
+		//bool				onlyopsmaysettopic;
+
 		std::string			password;//e password è "" vuol dire che canale non ha password
-//		bool				hasuserlimit;
+
 		size_t				userlimit;//if uerlimit i negative it mean there i no uerlimit for the channel
 
 	public:
-		std::string			buffer;
 
 	//Channel();
-	Channel(std::string newuser, std::string channelname);
+	Channel(int fd, std::string channelname);
 	//Channel(const Channel& other);
 	//Channel& operator=(const Channel& other);
 	~Channel();
@@ -37,12 +38,12 @@ class Channel
 	void removeFromInvites(int fd);
 
 	std::string getName() const;
+	std::string getTopic() const;
  	bool needsInvite() const;
 	bool needsPass() const;
 	bool userIsInChannel(int fd) const;
 	bool userIsInvited(int fd) const;
 	bool reachedUserLimit() const;
-	;
 /*	std::string getIp() const;
 	bool getPassword() const;
 	int getFd() const;
@@ -50,4 +51,5 @@ class Channel
 	
 	bool checkPass(std::string & password) const;
 	void sendToAll(std::string message);
+	std::string getListOfNicks(std::vector<User> & uservect) const;
 };
