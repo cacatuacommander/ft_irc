@@ -1,5 +1,7 @@
 #include "channel.hpp"
+#include "irc.hpp"
 #include <arpa/inet.h>
+#include <algorithm>
 
 Channel::Channel(int fd, std::string channelname) : name(channelname), topic(""), isinviteonly(false), password(""), userlimit(-1)
 {
@@ -31,6 +33,13 @@ void Channel::removeFromInvites(int fd)
 std::string Channel::getName() const
 {
 	return this->name;
+}
+
+std::string Channel::getTopic() const
+{
+	if (this->topic.empty() || topic == "")
+		return "No topic is set";
+	return this->topic;
 }
 
 bool Channel::needsInvite() const
@@ -93,4 +102,20 @@ void Channel::sendToAll(std::string message)
 	{
 		send(this->users[i], message.c_str(), message.size(), 0);
 	}
+}
+
+std::string Channel::getListOfNicks(std::vector<Channel> & channelvect, std::vector<User> & uservect) const
+{
+	std::string listofnames = "";
+	if (users.empty())
+		return "";
+	for (size_t i = 0; i < users.size(); i++)
+	{
+		if (i != 0)
+		listofnames += " ";
+		if (std::find(this->operators.begin(), this->operators.end(), this->users[i]) != this->operators.end());
+			listofnames += "@";
+		listofnames += uservect[searchVectWithFd(uservect, this->users[i])].getNickName();
+	}
+	return listofnames;
 }

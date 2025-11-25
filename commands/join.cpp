@@ -1,7 +1,33 @@
 
 #include "../irc.hpp"
 
-bool channelNameIsInvalid(Command cmd, int fd, std::string & channelname, std::string nickname)
+void succesfulJoinMessages(Command & cmd, std::string & nickname, std::string & channelname, int fd, std::vector<Channel> & channelvect, size_t ch_i, std::vector<User> & uservect, size_t i)
+{
+	//check other stuff (?) mi sa non c'era altro da controllare a parte ban che non serve
+	channelvect[ch_i].addToUsers(fd);
+	//:<nick>!<user>@<host> JOIN <channel>
+	std::string message = ":" + nickname + "!" + uservect[i].getUserName() + "@" + uservect[i].getIp() + " " + cmd.name + channelname + "\r\n";
+	channelvect[ch_i].sendToAll(message);
+	//:<server> 332 <nick> <channel> :<topic>
+	std::string msg = std::string(SERVER_NAME) + std::string(" 332 ") + nickname + " " + channelname + " :" + channelvect[ch_i].getTopic() + "\r\n";
+	send(fd, msg.c_str(), msg.size(), 0);
+	//:<server> 353 <nick> = <channel> :<space-separated nicks>
+	msg = std::string(SERVER_NAME) + std::string(" 353 ") + nickname + " = " + channelname + " :" + channelvect[ch_i].getListOfNicks(channelvect, uservect) + "\r\n";
+	send(fd, msg.c_str(), msg.size(), 0);
+	//:<server> 366 <nick> <channel> :End of /NAMES list.
+	msg = std::string(SERVER_NAME) + std::string(" 366 ") + nickname + " " + channelname + " :End of /NAMES list.\r\n";
+	send(fd, msg.c_str(), msg.size(), 0);
+}
+
+void createChannel(Command & cmd, std::string & nickname, std::string & channelname, int fd, std::vector<Channel> & channelvect, size_t ch_i, std::vector<User> & uservect, size_t i)
+{
+	//controllare se ci sono troppi canali gia?
+	//controllare unicita canale
+	channelvect.push_back(Channel(fd, channelname));
+	succesfulJoinMessages(cmd, nickname, channelname, fd, channelvect, ch_i, uservect, i);
+}
+
+bool channelNameIsInvalid(Command & cmd, int fd, std::string & channelname, std::string & nickname)
 {
 	if (channelname == "")
 	{
@@ -36,7 +62,7 @@ bool userAlredyPresent(int fd, std::vector<Channel> & channelvect, size_t ch_i)
 	return false;
 }
 
-void addUserToChannel(Command & cmd, std::string & nickname, std::string & channelname, int fd, std::vector<Channel> & channelvect, size_t ch_i)
+void addUserToChannel(Command & cmd, std::string & nickname, std::string & channelname, int fd, std::vector<Channel> & channelvect, size_t ch_i, std::vector<User> & uservect, size_t i)
 {
 	if (channelvect[ch_i].needsInvite())
 	{
@@ -82,17 +108,11 @@ void addUserToChannel(Command & cmd, std::string & nickname, std::string & chann
 			send(fd, reply.c_str(), reply.size(), 0);
 			return ;
 	}
-	//check other stuff (?) mi sa non c'era altro da controllare a parte ban che non serve
-	//:<nick>!<user>@<host> JOIN <channel>
+	succesfulJoinMessages(cmd, nickname, channelname, fd, channelvect, ch_i, uservect, i);
 
-	channelvect[ch_i].addToUsers(fd);
-	//Inviare all’utente:la conferma di join
-	//il topic del canale
-	//la lista degli utenti (NAMES)
-	//Inviare agli altri utenti del canale un messaggio di JOIN dell’utente entrato
 }
 
-void execJoin(Command cmd, int fd, std::vector<User> & uservect, std::vector<Channel> & channelvect)
+void execJoin(Command & cmd, int fd, std::vector<User> & uservect, std::vector<Channel> & channelvect)
 {
 	size_t i = searchVectWithFd(uservect, fd);
 	std::string nickname = uservect[i].getNickName();
@@ -113,12 +133,12 @@ void execJoin(Command cmd, int fd, std::vector<User> & uservect, std::vector<Cha
 
 	if (ch_i  == channelvect.size())
 	{
-		//createChannel()//controllare anche e ci sono già troppi canali?
+		createChannel()//controllare anche e ci sono già troppi canali?
 	}
 	else
 	{
 		if (userAlredyPresent(fd, channelvect, ch_i))
 			return ;//se utente è già presente nel canale, fa return senza mandare messaggi
-		addUserToChannel(cmd, nickname, channelname, fd, channelvect, ch_i);
+		addUserToChannel(cmd, nickname, channelname, fd, channelvect, ch_i, uservect, i);
 	}
 }

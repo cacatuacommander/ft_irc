@@ -3,7 +3,6 @@
 
 bool argumentsArePresent(Command cmd, unsigned int numbofargneeded, std::string nickname, int fd)
 {
-
 	if (nickname == "")
 		nickname = "*";
 
