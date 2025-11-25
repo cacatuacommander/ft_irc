@@ -19,7 +19,7 @@ bool argumentsArePresent(Command cmd, unsigned int numbofargneeded, std::string 
 	return false;
 }
 
-void exec_command(Command cmd, std::vector<User> & uservect, int fd, std::string serverpassword)
+void exec_command(Command cmd, std::vector<User> & uservect, std::vector<Channel> & channelvect, int fd, std::string serverpassword)
 {
 	if (cmd.name == "PASS")
 		execPass(cmd, fd, uservect, serverpassword);
@@ -27,4 +27,6 @@ void exec_command(Command cmd, std::vector<User> & uservect, int fd, std::string
 		execNick(cmd, fd, uservect);
 	if (cmd.name == "USER")
 		execUser(cmd, fd, uservect);
+	if (cmd.name == "JOIN")
+		execJoin(cmd, fd, uservect);
 }

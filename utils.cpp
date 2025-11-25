@@ -20,13 +20,32 @@ size_t searchVectWithFd(std::vector<User> & uservect, int fd)//da farla che rito
 	return i;
 }
 
-size_t searchVectWithNick(std::vector<User> & uservect, std::string nickname)//da farla che ritorna index invece di un iterator che e piu sicuro
+size_t searchVectWithNick(std::vector<User> & uservect, std::string & nickname)//da farla che ritorna index invece di un iterator che e piu sicuro
 {
 	std::vector<User>::iterator it;
 	size_t i = 0;
 	for (it = uservect.begin(); it != uservect.end(); ++it)
 	{
 		if (it->getNickName() == nickname)
+		{
+			/* std::cerr << "fd: " << it->getFd() <<  std::endl;
+			std::cerr << "nick: " << it->getNickName() <<  std::endl;
+			std::cerr << "user: " << it->getUserName() <<  std::endl;
+			std::cerr << "password: " << it->getPassword() <<  std::endl; */
+			return i;
+		}
+		i++;
+	}
+	return i;
+}
+
+size_t searchChannel(std::vector<Channel> & channelvect, std::string & channelname)
+{
+	std::vector<Channel>::iterator it;
+	size_t i = 0;
+	for (it = channelvect.begin(); it != channelvect.end(); ++it)
+	{
+		if (it->getName() == channelname)
 		{
 			/* std::cerr << "fd: " << it->getFd() <<  std::endl;
 			std::cerr << "nick: " << it->getNickName() <<  std::endl;
