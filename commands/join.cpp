@@ -53,10 +53,11 @@ bool channelNameIsInvalid(Command & cmd, int fd, std::string & channelname, std:
 		send(fd, reply.c_str(), reply.size(), 0);
 		return true;	
 	}
-	size_t i = 0;
+	size_t i = 1;
 	while (i < channelname.size())
 	{
-		if (channelname[i] < 33 || channelname[i] == ',' || channelname[i] == ':')
+		if (!((channelname[i] >= 'A' && channelname[i] <= 'Z') || (channelname[i] >= '0' && channelname[i] <= '9') || (channelname[i] >= 'a' &&  channelname[i] <= 'z') || \
+			channelname[i] == '_' || channelname[i] == '-'))
 		{
 			std::string reply = std::string(SERVER_NAME) + std::string(" 476 ") + nickname + " " + channelname + " :Bad Channel Mask\r\n";
 			send(fd, reply.c_str(), reply.size(), 0);
@@ -90,19 +91,20 @@ void addUserToChannel(Command & cmd, std::string & nickname, std::string & chann
 		}
 		else
 		{
-			//error msg
+			//:<server> 473 <nick> <channel> :Cannot join channel (+i)
+			std::string msg = std::string(SERVER_NAME) + std::string(" 473 ") + nickname + " " + channelname + " :Cannot join channel (+i)\r\n";
+			send(fd, msg.c_str(), msg.size(), 0);
 			return ;
 		}
 	}
 	else if (channelvect[ch_i].needsPass())
 	{
-		if (!argumentsArePresent(cmd, 2, nickname, fd))//checks password exist
-			return ;
-		/* {
+		if (!argumentsArePresent_mod(cmd, 2, nickname))//checks password exist
+		{
 			std::string reply = std::string(SERVER_NAME) + std::string(" 475 ") + nickname + " " + channelname + " :Cannot join channel (+k)\r\n";
 			send(fd, reply.c_str(), reply.size(), 0);
 			return ;
-		} */
+		}
 		std::string password;
 		if (cmd.params.size() >= 2)
 			password = cmd.params[1];

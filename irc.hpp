@@ -25,6 +25,9 @@ size_t searchVectWithNick(std::vector<User> & uservect, std::string & nickname);
 size_t searchChannel(std::vector<Channel> & chennelvect , std::string & channelname);
 
 bool argumentsArePresent(Command cmd, unsigned int numbofargneeded, std::string nickname, int fd);
+bool argumentsArePresent_mod(Command cmd, unsigned int numbofargneeded, std::string nickname);
+
+bool channelNameIsInvalid(Command & cmd, int fd, std::string & channelname, std::string & nickname);
 
 void execNick(Command cmd, int fd, std::vector<User> & uservect);
 void execUser(Command cmd, int fd, std::vector<User> & uservect);

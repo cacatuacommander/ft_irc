@@ -45,7 +45,8 @@ bool checkParamsPrvMsg(const Command &cmd, const std::string &nick, int fd, std:
     return true;
 }
 
-void execPrivMsg(Command cmd, int fd, std::vector<Channel>& channelVect, std::vector<User> & uservect) {
+void execPrivMsg(Command cmd, int fd, std::vector<Channel>& channelVect, std::vector<User> & uservect)
+{
     int is = searchVectWithFd(uservect, fd);
     std::string nick = uservect[is].getNickName().empty() ? "*" : uservect[is].getNickName();
     if (!checkParamsPrvMsg(cmd, nick, fd, uservect, channelVect))

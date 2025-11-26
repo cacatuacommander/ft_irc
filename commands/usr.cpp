@@ -62,21 +62,21 @@ void send_welcome_messages(int i, std::vector<User> & uservect, int fd)
 void execUser(Command cmd, int fd, std::vector<User> & uservect)
 {
 	size_t i = searchVectWithFd(uservect, fd);
-
-	if (usernameAlredySet(i, uservect, fd))
-		return ;
-	if (!argumentsArePresent(cmd, 4, uservect[i].getNickName(), fd))
-		return ;
-
-	std::string newusername = cmd.params[0];
-	std::string realname;
-	if(cmd.params.size() >= 4)
-		realname = cmd.params[3];
-	else
-		realname = cmd.trailing;
-
 	if (i < uservect.size())
 	{
+		if (usernameAlredySet(i, uservect, fd))
+			return ;
+		if (!argumentsArePresent(cmd, 4, uservect[i].getNickName(), fd))
+			return ;
+
+		std::string newusername = cmd.params[0];
+		std::string realname;
+		if(cmd.params.size() >= 4)
+			realname = cmd.params[3];
+		else
+			realname = cmd.trailing;
+
+
 		if (!isValidusername(newusername, fd, uservect[i].getNickName()))
 			return ;
 		uservect[i].setUserName(newusername);
