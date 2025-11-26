@@ -108,6 +108,31 @@ void Channel::sendToAll(std::string message)
 	}
 }
 
+bool Channel::removeUser(int fd)
+{
+	std::vector<int>::iterator it; it = std::find(users.begin(), users.end(), fd);
+	if (it != users.end())
+	{
+		users.erase(it);
+		return true;
+	}
+
+	it = std::find(operators.begin(), operators.end(), fd);
+	if (it != users.end())
+	{
+		operators.erase(it);
+		return true;
+	}
+	return false;
+}
+
+bool Channel::searchFDinOperators(int fd)
+{
+	if (std::find(this->operators.begin(), this->operators.end(), fd) != this->operators.end())
+		return true;
+	return false;
+}
+
 std::string Channel::getListOfNicks(std::vector<User> & uservect) const
 {
 	std::string listofnames = "";

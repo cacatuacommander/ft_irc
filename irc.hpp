@@ -32,3 +32,4 @@ void execPrivMsg(Command cmd, int fd, std::vector<Channel>& channelVect, std::ve
 void execPass(Command cmd, int fd, std::vector<User> & uservect, std::string realpassword);
 void execJoin(Command & cmd, int fd, std::vector<User> & uservect, std::vector<Channel> & channelvect);
 void exec_command(Command cmd, std::vector<User> & uservect, std::vector<Channel> & userchannel, int fd, std::string serverpassword);
+void execKick(Command cmd, int fd, std::vector<Channel> & userchannel, std::vector<User> & uservect);

@@ -44,6 +44,8 @@ class Channel
 	bool userIsInChannel(int fd) const;
 	bool userIsInvited(int fd) const;
 	bool reachedUserLimit() const;
+	bool searchFDinOperators(int fd);
+	bool removeUser(int fd);
 /*	std::string getIp() const;
 	bool getPassword() const;
 	int getFd() const;

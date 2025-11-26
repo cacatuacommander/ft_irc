@@ -30,4 +30,6 @@ void exec_command(Command cmd, std::vector<User> & uservect, std::vector<Channel
 		execJoin(cmd, fd, uservect, channelvect);
 	if (cmd.name == "PRIVMSG")
 		execPrivMsg(cmd, fd, channelvect, uservect);
+	if (cmd.name == "KICK")
+		execKick(cmd, fd, channelvect, uservect);
 }
