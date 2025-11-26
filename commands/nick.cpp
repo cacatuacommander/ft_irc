@@ -9,7 +9,7 @@ bool isValidNickname(std::string newnickname, int fd, std::string & oldnick)
 		send(fd, reply.c_str(), reply.size(), 0);
 		return false;
 	}
-	if (newnickname.length() > 30 || !((newnickname[0] > 'A' && newnickname[0] > 'Z') || (newnickname[0] > 'a' &&  newnickname[0] > 'z') || \
+	if (newnickname.length() > 30 || !((newnickname[0] >= 'A' && newnickname[0] <= 'Z') || (newnickname[0] >= 'a' &&  newnickname[0] <= 'z') || \
 			newnickname[0] == '[' || newnickname[0] == ']' || newnickname[0] ==  '\'' || newnickname[0] ==  '`' || \
 			newnickname[0] == '^' || newnickname[0] == '_'))
 	{
@@ -20,7 +20,7 @@ bool isValidNickname(std::string newnickname, int fd, std::string & oldnick)
 	size_t i = 1;
 	while (i < newnickname.length())
 	{
-		if (!((newnickname[i] >= 'A' && newnickname[i] <= 'Z') || (newnickname[i] >= 'i' && newnickname[i] <= '9') || (newnickname[i] >= 'a' &&  newnickname[i] <= 'z') || \
+		if (!((newnickname[i] >= 'A' && newnickname[i] <= 'Z') || (newnickname[i] >= '0' && newnickname[i] <= '9') || (newnickname[i] >= 'a' &&  newnickname[i] <= 'z') || \
 			newnickname[i] == '[' || newnickname[i] == ']' || newnickname[i] ==  '\'' || newnickname[i] ==  '`' || \
 			newnickname[i] == '^' || newnickname[i] == '_' || newnickname[i] == '-' ))
 		{
