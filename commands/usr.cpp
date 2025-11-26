@@ -8,7 +8,7 @@ bool isValidusername(std::string newusername, int fd, std::string oldnick) //:se
 		send(fd, reply.c_str(), reply.size(), 0);
 		return false;
 	}
-	if (newusername.length() > 9 || !((newusername[0] > 'A' && newusername[0] > 'Z') || (newusername[0] > 'a' &&  newusername[0] > 'z') || \
+	if (newusername.length() > 9 || !((newusername[0] >= 'A' && newusername[0] <= 'Z') || (newusername[0] >= 'a' &&  newusername[0] <= 'z') || \
 			newusername[0] == '-' || newusername[0] == '_'))
 	{
 		std::string reply = std::string(SERVER_NAME) + std::string(" 468 ") + oldnick + " :Invalid username\r\n";
@@ -18,7 +18,7 @@ bool isValidusername(std::string newusername, int fd, std::string oldnick) //:se
 	size_t i = 1;
 	while (i < newusername.length())
 	{
-		if (!((newusername[i] >= 'A' && newusername[i] <= 'Z') || (newusername[i] >= 'i' && newusername[i] <= '9') || (newusername[i] >= 'a' &&  newusername[i] <= 'z') || \
+		if (!((newusername[i] >= 'A' && newusername[i] <= 'Z') || (newusername[i] >= '0' && newusername[i] <= '9') || (newusername[i] >= 'a' &&  newusername[i] <= 'z') || \
 			newusername[i] == '_' || newusername[i] == '-' ))
 		{
 			std::string reply = std::string(SERVER_NAME) + std::string(" 468 ") + oldnick + " :Invalid username\r\n";
