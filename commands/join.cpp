@@ -8,13 +8,13 @@ void succesfulJoinMessages(Command & cmd, std::string & nickname, std::string & 
 	std::string message = ":" + nickname + "!" + uservect[i].getUserName() + "@" + uservect[i].getIp() + " " + cmd.name + " " + channelname + "\r\n";
 	channelvect[ch_i].sendToAll(message);
 	//:<server> 332 <nick> <channel> :<topic>
-	std::string msg = std::string(SERVER_NAME) + std::string(" 332 ") + nickname + " " + channelname + " :" + channelvect[ch_i].getTopic() + "\r\n";
+	std::string msg = ":" + std::string(SERVER_NAME) + std::string(" 332 ") + nickname + " " + channelname + " :" + channelvect[ch_i].getTopic() + "\r\n";
 	send(fd, msg.c_str(), msg.size(), 0);
 	//:<server> 353 <nick> = <channel> :<space-separated nicks>
-	msg = std::string(SERVER_NAME) + std::string(" 353 ") + nickname + " = " + channelname + " :" + channelvect[ch_i].getListOfNicks(uservect) + "\r\n";
+	msg = ":" + std::string(SERVER_NAME) + std::string(" 353 ") + nickname + " = " + channelname + " :" + channelvect[ch_i].getListOfNicks(uservect) + "\r\n";
 	send(fd, msg.c_str(), msg.size(), 0);
 	//:<server> 366 <nick> <channel> :End of /NAMES list.
-	msg = std::string(SERVER_NAME) + std::string(" 366 ") + nickname + " " + channelname + " :End of /NAMES list.\r\n";
+	msg = ":" + std::string(SERVER_NAME) + std::string(" 366 ") + nickname + " " + channelname + " :End of /NAMES list.\r\n";
 	send(fd, msg.c_str(), msg.size(), 0);
 }
 
@@ -43,13 +43,13 @@ bool channelNameIsInvalid(Command & cmd, int fd, std::string & channelname, std:
 {
 	if (channelname == "")
 	{
-		std::string reply = std::string(SERVER_NAME) + std::string(" 461 ") + nickname + " " + cmd.name + " :Not enough parameters\r\n";
+		std::string reply = ":" + std::string(SERVER_NAME) + std::string(" 461 ") + nickname + " " + cmd.name + " :Not enough parameters\r\n";
 		send(fd, reply.c_str(), reply.size(), 0);
 		return true;
 	}
 	else if ((channelname.size() < 2) || channelname.size() > 50 || channelname[0] != '#')//:server 476 nick ciao :Bad Channel Mask
 	{
-		std::string reply = std::string(SERVER_NAME) + std::string(" 476 ") + nickname + " " + channelname + " :Bad Channel Mask\r\n";
+		std::string reply = ":" + std::string(SERVER_NAME) + std::string(" 476 ") + nickname + " " + channelname + " :Bad Channel Mask\r\n";
 		send(fd, reply.c_str(), reply.size(), 0);
 		return true;	
 	}
@@ -59,7 +59,7 @@ bool channelNameIsInvalid(Command & cmd, int fd, std::string & channelname, std:
 		if (!((channelname[i] >= 'A' && channelname[i] <= 'Z') || (channelname[i] >= '0' && channelname[i] <= '9') || (channelname[i] >= 'a' &&  channelname[i] <= 'z') || \
 			channelname[i] == '_' || channelname[i] == '-'))
 		{
-			std::string reply = std::string(SERVER_NAME) + std::string(" 476 ") + nickname + " " + channelname + " :Bad Channel Mask\r\n";
+			std::string reply = ":" + std::string(SERVER_NAME) + std::string(" 476 ") + nickname + " " + channelname + " :Bad Channel Mask\r\n";
 			send(fd, reply.c_str(), reply.size(), 0);
 			return true;
 		}
@@ -92,7 +92,7 @@ void addUserToChannel(Command & cmd, std::string & nickname, std::string & chann
 		else
 		{
 			//:<server> 473 <nick> <channel> :Cannot join channel (+i)
-			std::string msg = std::string(SERVER_NAME) + std::string(" 473 ") + nickname + " " + channelname + " :Cannot join channel (+i)\r\n";
+			std::string msg = ":" + std::string(SERVER_NAME) + std::string(" 473 ") + nickname + " " + channelname + " :Cannot join channel (+i)\r\n";
 			send(fd, msg.c_str(), msg.size(), 0);
 			return ;
 		}
@@ -101,7 +101,7 @@ void addUserToChannel(Command & cmd, std::string & nickname, std::string & chann
 	{
 		if (!argumentsArePresent_mod(cmd, 2, nickname))//checks password exist
 		{
-			std::string reply = std::string(SERVER_NAME) + std::string(" 475 ") + nickname + " " + channelname + " :Cannot join channel (+k)\r\n";
+			std::string reply = ":" + std::string(SERVER_NAME) + std::string(" 475 ") + nickname + " " + channelname + " :Cannot join channel (+k)\r\n";
 			send(fd, reply.c_str(), reply.size(), 0);
 			return ;
 		}
@@ -113,14 +113,14 @@ void addUserToChannel(Command & cmd, std::string & nickname, std::string & chann
 
 		if (password == "" || channelvect[ch_i].checkPass(password))
 		{
-			std::string reply = std::string(SERVER_NAME) + std::string(" 475 ") + nickname + " " + channelname + " :Cannot join channel (+k)\r\n";
+			std::string reply = ":" + std::string(SERVER_NAME) + std::string(" 475 ") + nickname + " " + channelname + " :Cannot join channel (+k)\r\n";
 			send(fd, reply.c_str(), reply.size(), 0);
 			return ;
 		}
 	}
 	if (channelvect[ch_i].reachedUserLimit())
 	{
-			std::string reply = std::string(SERVER_NAME) + std::string(" 471 ") + nickname + " " + channelname + " :Cannot join channel (+l)\r\n";
+			std::string reply = ":" + std::string(SERVER_NAME) + std::string(" 471 ") + nickname + " " + channelname + " :Cannot join channel (+l)\r\n";
 			send(fd, reply.c_str(), reply.size(), 0);
 			return ;
 	}

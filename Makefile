@@ -14,6 +14,7 @@ SRC =	server_mod.cpp \
 		commands/join.cpp \
 		commands/privmsg.cpp \
 		commands/kick.cpp \
+		commands/mode.cpp \
 		channel.cpp \
 
 all: $(NAME)

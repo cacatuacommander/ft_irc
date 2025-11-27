@@ -13,9 +13,34 @@ Channel::Channel(int fd, std::string channelname) : name(channelname), topic("")
 
 Channel::~Channel() {}
 
+void Channel::setIsTopicRestricted(bool newistopicrestricted)
+{
+	this->istopicrestricted = newistopicrestricted;
+}
+
+void Channel::setIsInviteOnly(bool newisinviteonly)
+{
+	this->isinviteonly = newisinviteonly;
+}
+
+void Channel::setPass(std::string newpassword)
+{
+	this->password = newpassword;
+}
+
+void Channel::setUserLimit(int newuserlimit)
+{
+	this->userlimit = newuserlimit;
+}
+
 void Channel::addToUsers(int fd)
 {
 	this->users.push_back(fd);
+}
+
+void Channel::addToOperators(int fd)
+{
+	this->operators.push_back(fd);
 }
 
 void Channel::removeFromInvites(int fd)
@@ -32,9 +57,28 @@ void Channel::removeFromInvites(int fd)
 	}
 }
 
+void Channel::removeFromOperators(int fd)
+{
+	if (this->operators.empty())//controllo che forse non dovrebbe servire
+		return ;
+	for (size_t i = 0; i < operators.size(); i++)
+	{
+		if (operators[i] == fd)
+		{
+			operators.erase(operators.begin() + i);
+			return ;
+		}
+	}
+}
+
 std::string Channel::getName() const
 {
 	return this->name;
+}
+
+std::string Channel::getPass() const
+{
+	return this->password;
 }
 
 std::string Channel::getTopic() const
@@ -42,6 +86,11 @@ std::string Channel::getTopic() const
 	if (this->topic.empty() || topic == "")
 		return "No topic is set";
 	return this->topic;
+}
+
+int Channel::getUserlimit() const
+{
+	return this->userlimit;
 }
 
 bool Channel::needsInvite() const
@@ -54,6 +103,23 @@ bool Channel::needsPass() const
 	if (this->password.empty() || this->password == "")
 		return false;
 	return true;
+}
+
+bool Channel::isTopicResticted() const
+{
+	return this->istopicrestricted;
+}
+
+bool Channel::userIsInOperators(int fd) const
+{
+	if (this->operators.empty())
+		return false;
+	for (size_t i = 0; i < operators.size(); i++)
+	{
+		if (operators[i] == fd)
+			return true;
+	}
+	return false;
 }
 
 bool Channel::userIsInChannel(int fd) const
@@ -84,9 +150,19 @@ bool Channel::reachedUserLimit() const
 {
 	if (this->userlimit < 0)
 		return false;
-	if (this->users.size() >= this->userlimit)
+	if (this->users.size() >= static_cast<size_t>(this->userlimit))
 		return true;
 	return false;
+}
+
+size_t Channel::getOperatorsSize()
+{
+	return this->operators.size(); 
+}
+
+size_t Channel::getUsersSize() const
+{
+	return this->users.size(); 
 }
 
 bool Channel::checkPass(std::string & passwordtocheck) const
@@ -114,7 +190,7 @@ bool Channel::removeUser(int fd)
 	if (it != users.end())
 	{
 		users.erase(it);
-		return true;
+		return true;//ha senso questo qui?
 	}
 
 	it = std::find(operators.begin(), operators.end(), fd);

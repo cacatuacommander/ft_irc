@@ -14,12 +14,13 @@ class Channel
 		std::vector<int>	invites;
 		//mettere banmask?
 		
+		bool				istopicrestricted;
 		bool				isinviteonly;
 		//bool				onlyopsmaysettopic;
 
 		std::string			password;//e password è "" vuol dire che canale non ha password
 
-		size_t				userlimit;//if uerlimit i negative it mean there i no uerlimit for the channel
+		int				userlimit;//if uerlimit i negative it mean there i no uerlimit for the channel
 
 	public:
 
@@ -29,28 +30,33 @@ class Channel
 	//Channel& operator=(const Channel& other);
 	~Channel();
 
-/* 	void setNickName(std::string & newnickname);
-	void setUserName(std::string & newusername);
-	void setRealName(std::string & newrealname);
-	void setPassword();
-	void setIsVerified(); */
+
+	void setIsTopicRestricted(bool newistopicrestricted);
+	void setIsInviteOnly(bool newisinviteonly);
+	void setPass(std::string newpassword);
+	void setUserLimit(int newuserlimit);
 	void addToUsers(int fd);
+	void addToOperators(int fd);
 	void removeFromInvites(int fd);
+	void removeFromOperators(int fd);
 
 	std::string getName() const;
+	std::string getPass() const;
 	std::string getTopic() const;
+	int 		getUserlimit() const;
  	bool needsInvite() const;
 	bool needsPass() const;
+	bool isTopicResticted() const;
+	bool userIsInOperators(int fd) const;
 	bool userIsInChannel(int fd) const;
 	bool userIsInvited(int fd) const;
 	bool reachedUserLimit() const;
 	bool searchFDinOperators(int fd);
 	bool removeUser(int fd);
-/*	std::string getIp() const;
-	bool getPassword() const;
-	int getFd() const;
-	bool getIsVerified() const; */
-	
+
+	size_t getOperatorsSize();
+	size_t getUsersSize() const;
+
 	bool checkPass(std::string & password) const;
 	void sendToAll(std::string message);
 	std::string getListOfNicks(std::vector<User> & uservect) const;

@@ -4,14 +4,14 @@ bool isValidusername(std::string newusername, int fd, std::string oldnick) //:se
 {
 	if (newusername == "" || newusername.length() < 1)
 	{
-		std::string reply = std::string(SERVER_NAME) + std::string(" 468 ") + oldnick + " :Invalid username\r\n";
+		std::string reply = ":" + std::string(SERVER_NAME) + std::string(" 468 ") + oldnick + " :Invalid username\r\n";
 		send(fd, reply.c_str(), reply.size(), 0);
 		return false;
 	}
 	if (newusername.length() > 9 || !((newusername[0] >= 'A' && newusername[0] <= 'Z') || (newusername[0] >= 'a' &&  newusername[0] <= 'z') || \
 			newusername[0] == '-' || newusername[0] == '_'))
 	{
-		std::string reply = std::string(SERVER_NAME) + std::string(" 468 ") + oldnick + " :Invalid username\r\n";
+		std::string reply = ":" + std::string(SERVER_NAME) + std::string(" 468 ") + oldnick + " :Invalid username\r\n";
 		send(fd, reply.c_str(), reply.size(), 0);
 		return false;
 	}	
@@ -21,7 +21,7 @@ bool isValidusername(std::string newusername, int fd, std::string oldnick) //:se
 		if (!((newusername[i] >= 'A' && newusername[i] <= 'Z') || (newusername[i] >= '0' && newusername[i] <= '9') || (newusername[i] >= 'a' &&  newusername[i] <= 'z') || \
 			newusername[i] == '_' || newusername[i] == '-' ))
 		{
-			std::string reply = std::string(SERVER_NAME) + std::string(" 468 ") + oldnick + " :Invalid username\r\n";
+			std::string reply = ":" + std::string(SERVER_NAME) + std::string(" 468 ") + oldnick + " :Invalid username\r\n";
 			send(fd, reply.c_str(), reply.size(), 0);
 			return false;
 		}
@@ -34,7 +34,7 @@ bool usernameAlredySet(int i, std::vector<User> & uservect, int fd)
 {
 	if (uservect[i].getIsVerified())
 	{
-		std::string reply = std::string(SERVER_NAME) + std::string(" 462 ") + uservect[i].getNickName() + " :You may not reregister\r\n";
+		std::string reply = ":" + std::string(SERVER_NAME) + std::string(" 462 ") + uservect[i].getNickName() + " :You may not reregister\r\n";
 		send(fd, reply.c_str(), reply.size(), 0);
 		return true;
 	}
@@ -46,16 +46,16 @@ void send_welcome_messages(int i, std::vector<User> & uservect, int fd)
 	std::string message = std::string(SERVER_NAME) + std::string(" 001 ") + nick + " :Welcome to the IRC Network, " + nick + "!" + uservect[i].getNickName() + "@" + uservect[i].getIp() + "\r\n";
 	send(fd, message.c_str(), message.size(), 0);//:server 002 <nick> :Your host is <servername>, running version <version>
 	
-	message = std::string(SERVER_NAME) + std::string(" 002 ") + nick + " :Your host is " + "our.server.irc" + ", running version "+ std::string(SERVER_VERSION) + "\r\n";
+	message = ":" + std::string(SERVER_NAME) + std::string(" 002 ") + nick + " :Your host is " + "our.server.irc" + ", running version "+ std::string(SERVER_VERSION) + "\r\n";
 	send(fd, message.c_str(), message.size(), 0);
 	
-	message = std::string(SERVER_NAME) + std::string(" 003 ") + nick + " :This server was created " + std::string(SERVER_CREATION_DATE) + "\r\n";
+	message = ":" + std::string(SERVER_NAME) + std::string(" 003 ") + nick + " :This server was created " + std::string(SERVER_CREATION_DATE) + "\r\n";
 	send(fd, message.c_str(), message.size(), 0);//:server 003 <nick> :This server was created <date>//:server 004 <nick> <servername> <version> <usermodes> <chanmodes>
 	
-	message = std::string(SERVER_NAME) + std::string(" 004 ") + nick + " :This server was created " + std::string(SERVER_NAME) + " " + std::string(SERVER_VERSION) + " iwso itkol" +"\r\n";
+	message = ":" + std::string(SERVER_NAME) + std::string(" 004 ") + nick + " :This server was created " + std::string(SERVER_NAME) + " " + std::string(SERVER_VERSION) + " iwso itkol" +"\r\n";
 	send(fd, message.c_str(), message.size(), 0);//:server 005 <nick> <parameter1> <parameter2> ... :<optional comment>
 	
-	message = std::string(SERVER_NAME) + std::string(" 005 ") + nick + " :CHANTYPES=# PREFIX=(o)@ CHANMODES=k,l,imnt NETWORK=myircc :are supported by this server\r\n";
+	message = ":" + std::string(SERVER_NAME) + std::string(" 005 ") + nick + " :CHANTYPES=# PREFIX=(o)@ CHANMODES=k,l,imnt NETWORK=myircc :are supported by this server\r\n";
 	send(fd, message.c_str(), message.size(), 0);
 }
 
