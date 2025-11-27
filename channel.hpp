@@ -36,7 +36,6 @@ class Channel
 	void setIsVerified(); */
 	void addToUsers(int fd);
 	void removeFromInvites(int fd);
-
 	std::string getName() const;
 	std::string getTopic() const;
  	bool needsInvite() const;
@@ -46,6 +45,8 @@ class Channel
 	bool reachedUserLimit() const;
 	bool searchFDinOperators(int fd);
 	bool removeUser(int fd);
+	void addUserToInviteList(int fd);
+	void changeTopic(std::string new_topic);
 /*	std::string getIp() const;
 	bool getPassword() const;
 	int getFd() const;

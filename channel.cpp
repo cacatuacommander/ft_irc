@@ -110,7 +110,8 @@ void Channel::sendToAll(std::string message)
 
 bool Channel::removeUser(int fd)
 {
-	std::vector<int>::iterator it; it = std::find(users.begin(), users.end(), fd);
+	std::vector<int>::iterator it;
+	it = std::find(users.begin(), users.end(), fd);
 	if (it != users.end())
 	{
 		users.erase(it);
@@ -124,6 +125,17 @@ bool Channel::removeUser(int fd)
 		return true;
 	}
 	return false;
+}
+
+void Channel::changeTopic(std::string new_topic)
+{
+	this->topic = new_topic;
+}
+
+
+void Channel::addUserToInviteList(int fd) 
+{
+	invites.push_back(fd);
 }
 
 bool Channel::searchFDinOperators(int fd)

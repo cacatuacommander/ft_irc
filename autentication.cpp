@@ -32,4 +32,8 @@ void exec_command(Command cmd, std::vector<User> & uservect, std::vector<Channel
 		execPrivMsg(cmd, fd, channelvect, uservect);
 	if (cmd.name == "KICK")
 		execKick(cmd, fd, channelvect, uservect);
+	if (cmd.name == "INVITE")
+		execInvite(cmd, fd, channelvect, uservect);
+	if (cmd.name == "TOPIC")
+		execTopic(cmd, fd, channelvect, uservect);
 }

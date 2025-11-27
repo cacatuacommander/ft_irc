@@ -24,6 +24,7 @@ std::vector<User>::const_iterator userResearch(int fd, const std::vector<User>& 
 Command Parser::parse(const std::string& input, const std::vector<User>& usr_vec, const int fd) {
 	Command cmd;
 	cmd.valid = false;
+	cmd.ghost_trail = false;
 	std::string tmp = input;
 
 	std::vector<User>::const_iterator curr_usr = userResearch(fd, usr_vec);
@@ -44,6 +45,7 @@ Command Parser::parse(const std::string& input, const std::vector<User>& usr_vec
 	size_t pos = tmp.find(" :");
 	if (pos != std::string::npos)
 	{
+		cmd.ghost_trail = true;
 		cmd.trailing = tmp.substr(pos + 2);
 		tmp = tmp.substr(0, pos);
 	}
