@@ -15,7 +15,7 @@
 #include "Parser.hpp"
 #include "channel.hpp"
 
-#define SERVER_NAME ":our.server.irc"
+#define SERVER_NAME "our.server.irc"
 
 #define SERVER_CREATION_DATE "Mon Nov 11 2024"
 
@@ -26,6 +26,9 @@ size_t searchVectWithNick(std::vector<User> & uservect, std::string & nickname);
 size_t searchChannel(std::vector<Channel> & chennelvect , std::string & channelname);
 
 bool argumentsArePresent(Command cmd, unsigned int numbofargneeded, std::string nickname, int fd);
+bool argumentsArePresent_mod(Command cmd, unsigned int numbofargneeded, std::string nickname);
+
+bool channelNameIsInvalid(Command & cmd, int fd, std::string & channelname, std::string & nickname);
 
 void execNick(Command cmd, int fd, std::vector<User> & uservect);
 void execUser(Command cmd, int fd, std::vector<User> & uservect);
@@ -36,3 +39,5 @@ void exec_command(Command cmd, std::vector<User> & uservect, std::vector<Channel
 void execKick(Command cmd, int fd, std::vector<Channel> & userchannel, std::vector<User> & uservect);
 void execInvite(Command cmd, int fd, std::vector<Channel> & userchannel, std::vector<User> & uservect);
 void execTopic(Command cmd, int fd, std::vector<Channel> & userchannel, std::vector<User> & uservect);
+void execMode(Command & cmd, int fd, std::vector<User> & uservect, std::vector<Channel> & channelvect);
+

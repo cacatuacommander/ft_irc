@@ -45,6 +45,7 @@ bool checkParamsPrvMsg(const Command &cmd, std::vector<std::string> multiParam, 
         return false;
     }
 
+<<<<<<< HEAD
     for (size_t i = 0; i < multiParam.size(); i++)
     {
         if (!checkCmdParams(nick, fd, uservect, channelVect, multiParam[i]))

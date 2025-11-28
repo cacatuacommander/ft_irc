@@ -76,6 +76,7 @@ void execKick(Command cmd, int fd, std::vector<Channel>& channelVect, std::vecto
                 sender.getIp() + " KICK " +
                 channel.getName() + " " +
                 target.getNickName() + " :" + kick_reason;
+
     channel.sendToAll(msg, fd);
     channel.removeUser(target.getFd());
 }

@@ -56,20 +56,24 @@ void execNick(Command cmd, int fd, std::vector<User> & uservect)
 {
 	size_t i = searchVectWithFd(uservect, fd);
 
-	if (!argumentsArePresent(cmd, 1, uservect[i].getNickName(), fd))
-		return ;
-
-	std::string newnickname;
-	if(cmd.params.size() > 0)
-		newnickname = cmd.params[0];
-	else
-		newnickname = cmd.trailing;
-	
 	if (i < uservect.size())
 	{
 		std::string oldnick = uservect[i].getNickName();
 		if (oldnick == "")
 			oldnick = "*";
+
+		if (!argumentsArePresent_mod(cmd, 1, oldnick))
+		{
+			//:<server> 431 <nick> :No nickname given
+			std::string reply = std::string(SERVER_NAME) + std::string(" 431 ") + oldnick + " :No nickname given\r\n";
+			send(fd, reply.c_str(), reply.size(), 0);
+			return ;
+		}
+		std::string newnickname;
+		if(cmd.params.size() > 0)
+			newnickname = cmd.params[0];
+		else
+			newnickname = cmd.trailing;
 
 		if (!isValidNickname(newnickname, fd, oldnick))
 			return ;

@@ -5,7 +5,8 @@
 
 size_t searchVectWithFd(std::vector<User> & uservect, int fd);
 
-Channel::Channel(int fd, std::string channelname) : name(channelname), topic(""), isinviteonly(false), password(""), userlimit(-1)
+Channel::Channel(int fd, std::string channelname) : name(channelname), topic(""), istopicrestricted(false), isinviteonly(false), password(""), userlimit(-1)
+
 {
 	users.push_back(fd);
 	operators.push_back(fd);
@@ -13,9 +14,48 @@ Channel::Channel(int fd, std::string channelname) : name(channelname), topic("")
 
 Channel::~Channel() {}
 
+void Channel::setIsTopicRestricted(bool newistopicrestricted)
+{
+	this->istopicrestricted = newistopicrestricted;
+}
+
+void Channel::setIsInviteOnly(bool newisinviteonly)
+{
+	this->isinviteonly = newisinviteonly;
+}
+
+void Channel::setPass(std::string newpassword)
+{
+	this->password = newpassword;
+}
+
+void Channel::setUserLimit(int newuserlimit)
+{
+	this->userlimit = newuserlimit;
+}
+
 void Channel::addToUsers(int fd)
 {
 	this->users.push_back(fd);
+}
+
+void Channel::addToOperators(int fd)
+{
+	this->operators.push_back(fd);
+}
+
+void Channel::removeFromUsers(int fd)
+{
+	if (this->users.empty())//controllo che forse non dovrebbe servire
+		return ;
+	for (size_t i = 0; i < users.size(); i++)
+	{
+		if (users[i] == fd)
+		{
+			users.erase(users.begin() + i);
+			return ;
+		}
+	}
 }
 
 void Channel::removeFromInvites(int fd)
@@ -32,10 +72,31 @@ void Channel::removeFromInvites(int fd)
 	}
 }
 
+void Channel::removeFromOperators(int fd)
+{
+	if (this->operators.empty())//controllo che forse non dovrebbe servire
+		return ;
+	for (size_t i = 0; i < operators.size(); i++)
+	{
+		if (operators[i] == fd)
+		{
+			operators.erase(operators.begin() + i);
+			return ;
+		}
+	}
+}
+
 std::string Channel::getName() const
 {
 	return this->name;
 }
+
+
+std::string Channel::getPass() const
+{
+	return this->password;
+}
+
 
 std::string Channel::getTopic() const
 {
@@ -43,6 +104,13 @@ std::string Channel::getTopic() const
 		return "No topic is set";
 	return this->topic;
 }
+
+
+int Channel::getUserlimit() const
+{
+	return this->userlimit;
+}
+
 
 bool Channel::needsInvite() const
 {
@@ -54,6 +122,23 @@ bool Channel::needsPass() const
 	if (this->password.empty() || this->password == "")
 		return false;
 	return true;
+}
+
+bool Channel::isTopicResticted() const
+{
+	return this->istopicrestricted;
+}
+
+bool Channel::userIsInOperators(int fd) const
+{
+	if (this->operators.empty())
+		return false;
+	for (size_t i = 0; i < operators.size(); i++)
+	{
+		if (operators[i] == fd)
+			return true;
+	}
+	return false;
 }
 
 bool Channel::userIsInChannel(int fd) const
@@ -84,9 +169,19 @@ bool Channel::reachedUserLimit() const
 {
 	if (this->userlimit < 0)
 		return false;
-	if (this->users.size() >= this->userlimit)
+	if (this->users.size() >= static_cast<size_t>(this->userlimit))
 		return true;
 	return false;
+}
+
+size_t Channel::getOperatorsSize() const
+{
+	return this->operators.size(); 
+}
+
+size_t Channel::getUsersSize() const
+{
+	return this->users.size(); 
 }
 
 bool Channel::checkPass(std::string & passwordtocheck) const
@@ -111,7 +206,14 @@ void Channel::sendToAll(std::string message, int fd)
 
 bool Channel::removeUser(int fd)
 {
+
 	std::vector<int>::iterator it;
+	it = std::find(operators.begin(), operators.end(), fd);
+	if (it != users.end())
+	{
+		operators.erase(it);
+	}
+	
 	it = std::find(users.begin(), users.end(), fd);
 	if (it != users.end())
 	{
@@ -119,12 +221,6 @@ bool Channel::removeUser(int fd)
 		return true;
 	}
 
-	it = std::find(operators.begin(), operators.end(), fd);
-	if (it != users.end())
-	{
-		operators.erase(it);
-		return true;
-	}
 	return false;
 }
 
@@ -155,6 +251,7 @@ std::string Channel::getListOfNicks(std::vector<User> & uservect) const
 	{
 		if (i != 0)
 			listofnames += " ";
+
 		if (std::find(this->operators.begin(), this->operators.end(), this->users[i]) != this->operators.end())
 			listofnames += "@";
 		listofnames += uservect[searchVectWithFd(uservect, this->users[i])].getNickName();

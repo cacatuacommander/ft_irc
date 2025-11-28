@@ -18,6 +18,20 @@ bool argumentsArePresent(Command cmd, unsigned int numbofargneeded, std::string 
 	return false;
 }
 
+bool argumentsArePresent_mod(Command cmd, unsigned int numbofargneeded, std::string nickname)
+{
+	if (nickname == "")
+		nickname = "*";
+
+	size_t argsn = cmd.params.size();
+	if (!cmd.trailing.empty())
+		argsn++;
+	if (argsn >= numbofargneeded)
+		return true;
+
+	return false;
+}
+
 void exec_command(Command cmd, std::vector<User> & uservect, std::vector<Channel> & channelvect, int fd, std::string serverpassword)
 {
 	if (cmd.name == "PASS")
@@ -36,4 +50,6 @@ void exec_command(Command cmd, std::vector<User> & uservect, std::vector<Channel
 		execInvite(cmd, fd, channelvect, uservect);
 	if (cmd.name == "TOPIC")
 		execTopic(cmd, fd, channelvect, uservect);
+	if (cmd.name == "MODE")
+		execMode(cmd, fd, uservect, channelvect);
 }
