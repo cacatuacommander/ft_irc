@@ -69,6 +69,6 @@ void execTopic(Command cmd, int fd, std::vector<Channel>& channelVect, std::vect
     {
         channel.changeTopic(cmd.trailing);
         msg = ":" + sender.getNickName() + " TOPIC " + channel.getName() + " :" + channel.getTopic() + "\r\n";
-        channel.sendToAll(msg);
+        channel.sendToAll(msg, fd);
     }
 }

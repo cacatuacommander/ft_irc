@@ -98,13 +98,14 @@ bool Channel::checkPass(std::string & passwordtocheck) const
 	return false;
 }
 
-void Channel::sendToAll(std::string message)
+void Channel::sendToAll(std::string message, int fd)
 {
 	if (this->users.empty())//controllo che forse non serve
 		return ;
 	for (size_t i = 0; i < users.size(); i++)
 	{
-		send(this->users[i], message.c_str(), message.size(), 0);
+		if (fd != this->users[i])
+			send(this->users[i], message.c_str(), message.size(), 0);
 	}
 }
 
@@ -153,7 +154,7 @@ std::string Channel::getListOfNicks(std::vector<User> & uservect) const
 	for (size_t i = 0; i < users.size(); i++)
 	{
 		if (i != 0)
-		listofnames += " ";
+			listofnames += " ";
 		if (std::find(this->operators.begin(), this->operators.end(), this->users[i]) != this->operators.end())
 			listofnames += "@";
 		listofnames += uservect[searchVectWithFd(uservect, this->users[i])].getNickName();

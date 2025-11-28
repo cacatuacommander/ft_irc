@@ -120,8 +120,10 @@ int main(int argc, char** argv)
 
 						uservect[index].buffer.append(buffer, bytes);
 						size_t pos;
-						while ((pos = uservect[index].buffer.find("\r\n")) != std::string::npos)
+						std::cout << "stringa di input : " << uservect[index].buffer << std::endl;
+						while ((pos = uservect[index].buffer.find("\n")) != std::string::npos)
 						{
+
 							std::string line = uservect[index].buffer.substr(0, pos);
 							uservect[index].buffer.erase(0, pos + 2);
 							//fare controllo che line non sia piu di 512(?)

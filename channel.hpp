@@ -53,6 +53,6 @@ class Channel
 	bool getIsVerified() const; */
 	
 	bool checkPass(std::string & password) const;
-	void sendToAll(std::string message);
+	void sendToAll(std::string message, int fd);
 	std::string getListOfNicks(std::vector<User> & uservect) const;
 };

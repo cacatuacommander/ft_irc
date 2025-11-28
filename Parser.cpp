@@ -1,9 +1,8 @@
 #include "irc.hpp"
-#include <sstream>
 
 bool Parser::cmd_exist(const std::string& cmd) {
 	std::string cmd_list[] = {"PING", "PONG", "JOIN", "PART", "PRIVMSG", "QUIT", "MODE", "KICK", "INVITE", "TOPIC", "PASS", "NICK", "USER"};
-	for (int i = 0; i < 13; i++)//qua era 9 ho messo 13 che se no non controllava gli ultimi(che erano proprio nick e user aha) e ho separato ping e pong e join e part che sono comandi singoli(credo)
+	for (int i = 0; i < 13; i++)
 	{
 		if (cmd == cmd_list[i])
 			return true;
