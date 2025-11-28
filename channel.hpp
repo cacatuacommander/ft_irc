@@ -20,7 +20,7 @@ class Channel
 
 		std::string			password;//e password è "" vuol dire che canale non ha password
 
-		int				userlimit;//if uerlimit i negative it mean there i no uerlimit for the channel
+		int					userlimit;//if userlimit i negative it mean there i no userlimit for the channel
 
 	public:
 
@@ -37,6 +37,7 @@ class Channel
 	void setUserLimit(int newuserlimit);
 	void addToUsers(int fd);
 	void addToOperators(int fd);
+	void removeFromUsers(int fd);
 	void removeFromInvites(int fd);
 	void removeFromOperators(int fd);
 
@@ -54,7 +55,7 @@ class Channel
 	bool searchFDinOperators(int fd);
 	bool removeUser(int fd);
 
-	size_t getOperatorsSize();
+	size_t getOperatorsSize() const;
 	size_t getUsersSize() const;
 
 	bool checkPass(std::string & password) const;

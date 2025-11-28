@@ -1,6 +1,7 @@
 
 #include "irc.hpp"
 
+//int port = 6667;
 #define PORT 6667
 #define MAX_CLIENTS 10
 
@@ -10,6 +11,26 @@
 // {
 //     g_running = false;
 // }
+
+void deleteFromGroups(std::vector<Channel> & channelvect, int fd)
+{
+	if (channelvect.empty())//controllo potenzialmente superfluo ma non si sa mai
+		return ;
+	size_t sizee = channelvect.size();
+	for (size_t i = 0; i < sizee; i++)
+	{
+		channelvect[i].removeFromUsers(fd);
+		channelvect[i].removeFromOperators(fd);
+		channelvect[i].removeFromInvites(fd);
+		//se ultimo operatore esce dal canale (ma ci sono ancora utenti normali) canale rimane senza operatori perche irc e' cosi'
+		if (channelvect[i].getUsersSize() == 0)
+		{
+			channelvect.erase(channelvect.begin() + i);
+			--i;
+			--sizee;
+		}
+	}
+}
 
 int main(int argc, char** argv)
 {
@@ -24,13 +45,15 @@ int main(int argc, char** argv)
     sa.sa_flags = 0;
     sigaction(SIGINT, &sa, NULL); */
 
-	if (argc < 2 )
+	if (argc < 2)//da modificare per aggiundere porta
 	{
 		std::cerr << "missing argument password needed" << std::endl;
 		return 0;
 	}
 
-	std::string password = argv[1];
+	std::string password = argv[1];//da modificare per aggiungere porta
+
+	//port = atoi(argv[1]);//da controllare se argv1 e' numero
 
 	server_fd = socket(AF_INET, SOCK_STREAM, 0);
 	if (server_fd < 0)
@@ -45,7 +68,7 @@ int main(int argc, char** argv)
 	std::memset(&address, 0, sizeof(address));
 	address.sin_family = AF_INET;
 	address.sin_addr.s_addr = INADDR_ANY;
-	address.sin_port = htons(PORT);
+	address.sin_port = htons(PORT);//da modificare per aggiungere porta
 
 	if (bind(server_fd, (struct sockaddr*)&address, sizeof(address)) < 0)
 	{
@@ -105,6 +128,7 @@ int main(int argc, char** argv)
 						int ind = searchVectWithFd(uservect, fds[i].fd);
 						uservect.erase(uservect.begin() + ind);
 						//levare utente anche da tutti i gruppi
+						deleteFromGroups(channelvect, fds[i].fd);
 						close(fds[i].fd);
 						fds.erase(fds.begin() + i);
 						std::cout << "Client disconnected (fd=" << fds[i].fd << ")\n";

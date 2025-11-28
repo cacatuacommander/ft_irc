@@ -111,7 +111,7 @@ void addUserToChannel(Command & cmd, std::string & nickname, std::string & chann
 		else
 			password = cmd.trailing;
 
-		if (password == "" || channelvect[ch_i].checkPass(password))
+		if (password == "" || !channelvect[ch_i].checkPass(password))
 		{
 			std::string reply = ":" + std::string(SERVER_NAME) + std::string(" 475 ") + nickname + " " + channelname + " :Cannot join channel (+k)\r\n";
 			send(fd, reply.c_str(), reply.size(), 0);

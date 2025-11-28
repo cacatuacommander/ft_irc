@@ -5,7 +5,7 @@
 
 size_t searchVectWithFd(std::vector<User> & uservect, int fd);
 
-Channel::Channel(int fd, std::string channelname) : name(channelname), topic(""), isinviteonly(false), password(""), userlimit(-1)
+Channel::Channel(int fd, std::string channelname) : name(channelname), topic(""), istopicrestricted(false), isinviteonly(false), password(""), userlimit(-1)
 {
 	users.push_back(fd);
 	operators.push_back(fd);
@@ -41,6 +41,20 @@ void Channel::addToUsers(int fd)
 void Channel::addToOperators(int fd)
 {
 	this->operators.push_back(fd);
+}
+
+void Channel::removeFromUsers(int fd)
+{
+	if (this->users.empty())//controllo che forse non dovrebbe servire
+		return ;
+	for (size_t i = 0; i < users.size(); i++)
+	{
+		if (users[i] == fd)
+		{
+			users.erase(users.begin() + i);
+			return ;
+		}
+	}
 }
 
 void Channel::removeFromInvites(int fd)
@@ -155,7 +169,7 @@ bool Channel::reachedUserLimit() const
 	return false;
 }
 
-size_t Channel::getOperatorsSize()
+size_t Channel::getOperatorsSize() const
 {
 	return this->operators.size(); 
 }

@@ -9,7 +9,7 @@
 void getCurrentChannelStatus(std::string & nickname, std::string & channelname, size_t ch_i, std::vector<Channel> & channelvect, int fd)
 {
 	std::string reply = ":" + std::string(SERVER_NAME) + std::string(" 324 ") + nickname + " " + channelname ;
-	if (channelvect[ch_i].needsInvite() || channelvect[ch_i].isTopicResticted() || channelvect[ch_i].needsPass() || (channelvect[ch_i].getUserlimit() < 0))
+	if (channelvect[ch_i].needsInvite() || channelvect[ch_i].isTopicResticted() || channelvect[ch_i].needsPass() || (channelvect[ch_i].getUserlimit() > 0))
 		reply += " +";
 	if (channelvect[ch_i].needsInvite())
 		reply += "i";
@@ -75,14 +75,17 @@ bool addNewOperatorToChannel(Command & cmd, int fd, std::vector<Channel> & chann
 		send(fd, reply.c_str(), reply.size(), 0);
 		return false;
 	}
-	int newoperatorfd = searchVectWithNick(uservect, cmd.params[i2]);
-	if (static_cast<size_t>(newoperatorfd) == uservect.size())
+	std::cout << " param i2: " << cmd.params[i2] << " i2: " << i2 << std::endl; 
+	size_t newoperatorindex = searchVectWithNick(uservect, cmd.params[i2]);
+	std::cout << " fddddddd: " << i2 << std::endl; 
+	if (newoperatorindex == uservect.size())
 	{
 		//:server 401 <nick> Dan :No such nick/channel
 		std::string reply = ":" + std::string(SERVER_NAME) + std::string(" 401 ") + nickname + " " + cmd.params[i2] + " :No such nick/channel\r\n";
 		send(fd, reply.c_str(), reply.size(), 0);
 		return false;
 	}
+	int newoperatorfd = uservect[newoperatorindex].getFd();
 	if (!channelvect[ch_i].userIsInChannel(newoperatorfd))
 	{
 		//:server 441 <nick> Dan #chat :They aren't on that channel
@@ -103,14 +106,15 @@ bool removeOperatorFromChannel(Command & cmd, int fd, std::vector<Channel> & cha
 		send(fd, reply.c_str(), reply.size(), 0);
 		return false;
 	}
-	int operatortoremovefd = searchVectWithNick(uservect, cmd.params[i2]);
-	if (static_cast<size_t>(operatortoremovefd) == uservect.size())
+	size_t operatortoremoveindex = searchVectWithNick(uservect, cmd.params[i2]);
+	if (operatortoremoveindex == uservect.size())
 	{
 		//:server 401 <nick> Dan :No such nick/channel
 		std::string reply = ":" + std::string(SERVER_NAME) + std::string(" 401 ") + nickname + " " + cmd.params[i2] + " :No such nick/channel\r\n";
 		send(fd, reply.c_str(), reply.size(), 0);
 		return false;
 	}
+	int operatortoremovefd = uservect[operatortoremoveindex].getFd();
 	if (!channelvect[ch_i].userIsInChannel(operatortoremovefd))
 	{
 		//:server 441 <nick> Dan #chat :They aren't on that channel
@@ -198,6 +202,8 @@ bool SetNewUserlimitForChannel(Command & cmd, int fd, std::vector<Channel> & cha
 		send(fd, reply.c_str(), reply.size(), 0);
 		return false;
 	}
+	channelvect[ch_i].setUserLimit(newlimit);
+	i2++;
 	return true;
 }
 
@@ -365,7 +371,7 @@ void execMode(Command & cmd, int fd, std::vector<User> & uservect, std::vector<C
 					return ;
 
 			}
-			if (cmd.params[z][j] == '-')
+			else if (cmd.params[z][j] == '-')
 			{
 				isplus = false;
 				j++;
