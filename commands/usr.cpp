@@ -55,7 +55,7 @@ void send_welcome_messages(int i, std::vector<User> & uservect, int fd)
 	message = ":" + std::string(SERVER_NAME) + std::string(" 004 ") + nick + " :This server was created " + std::string(SERVER_NAME) + " " + std::string(SERVER_VERSION) + " iwso itkol" +"\r\n";
 	send(fd, message.c_str(), message.size(), 0);//:server 005 <nick> <parameter1> <parameter2> ... :<optional comment>
 	
-	message = ":" + std::string(SERVER_NAME) + std::string(" 005 ") + nick + " :CHANTYPES=# PREFIX=(o)@ CHANMODES=k,l,imnt NETWORK=myircc :are supported by this server\r\n";
+	message = ":" + std::string(SERVER_NAME) + std::string(" 005 ") + nick + " :CHANTYPES=# PREFIX=(o)@ CHANMODES=k,l,i,t NETWORK=myircc :are supported by this server\r\n";
 	send(fd, message.c_str(), message.size(), 0);
 }
 

@@ -29,7 +29,7 @@ bool checkParamsTopic(const Command &cmd, const std::string &nick, int fd, std::
         return false;
     }
 
-    if (!channel.searchFDinOperators(fd) && !cmd.trailing.empty())
+    if (!channel.searchFDinOperators(fd) && !cmd.trailing.empty() && channel.isTopicResticted())
     {
         std::string msg = ":" + std::string(SERVER_NAME) + " 482 " + nick +
                           " " + channelName + " :You're not channel operator\r\n";

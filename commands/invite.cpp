@@ -69,7 +69,7 @@ void execInvite(Command cmd, int fd, std::vector<Channel>& channelVect, std::vec
     User &target = uservect[target_index];
 
     channel.addUserToInviteList(target.getFd());
-    std::string msg = ":" + std::string(SERVER_NAME) + "341" +
+    std::string msg = ":" + std::string(SERVER_NAME) + " 341 " +
                 sender.getNickName() + " " +
                 target.getNickName() + " " +
                 channel.getName() + "\r\n";

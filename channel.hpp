@@ -39,10 +39,8 @@ class Channel
 	void addToOperators(int fd);
 	void removeFromUsers(int fd);
 	void removeFromInvites(int fd);
-	std::string getName() const;
-	std::string getTopic() const;
 	void removeFromOperators(int fd);
-
+	
 	std::string getName() const;
 	std::string getPass() const;
 	std::string getTopic() const;

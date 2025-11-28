@@ -6,7 +6,7 @@ void succesfulJoinMessages(Command & cmd, std::string & nickname, std::string & 
 
 	//:<nick>!<user>@<host> JOIN <channel>
 	std::string message = ":" + nickname + "!" + uservect[i].getUserName() + "@" + uservect[i].getIp() + " " + cmd.name + " " + channelname + "\r\n";
-	channelvect[ch_i].sendToAll(message);
+	channelvect[ch_i].sendToAll(message, fd);
 	//:<server> 332 <nick> <channel> :<topic>
 	std::string msg = ":" + std::string(SERVER_NAME) + std::string(" 332 ") + nickname + " " + channelname + " :" + channelvect[ch_i].getTopic() + "\r\n";
 	send(fd, msg.c_str(), msg.size(), 0);
