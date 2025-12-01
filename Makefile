@@ -19,6 +19,7 @@ SRC =	server_mod.cpp \
 		commands/mode.cpp \
 		commands/part.cpp \
 		commands/quit.cpp \
+		commands/ping.cpp \
 		channel.cpp \
 
 all: $(NAME)

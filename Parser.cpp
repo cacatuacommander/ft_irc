@@ -75,7 +75,7 @@ Command Parser::parse(const std::string& input, const std::vector<User>& usr_vec
 			}
 		}
 		else {
-			if (curr_usr->getUserName() == "" && tmpCmd != "PING / PONG" && tmpCmd != "QUIT" && tmpCmd != "PASS") {
+			if (curr_usr->getUserName() == "" && tmpCmd != "PING" && tmpCmd != "PONG" && tmpCmd != "QUIT" && tmpCmd != "PASS") {
 				std::string msg = ":" + std::string(SERVER_NAME) + " 451 " + nick + " :You have not registered\r\n";
 				send(fd, msg.c_str(), msg.size(), 0);
 				return cmd;

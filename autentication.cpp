@@ -58,4 +58,6 @@ void exec_command(Command cmd, std::vector<User> & uservect, std::vector<Channel
 		execPart(cmd, fds[i].fd, uservect, channelvect);
 	if (cmd.name == "QUIT")
 		execQuit(cmd, fds[i].fd, uservect, channelvect, fds, i);
+	if (cmd.name == "PING")
+		execPing(cmd, fds[i].fd,, uservect);
 }
