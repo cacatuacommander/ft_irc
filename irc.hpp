@@ -41,7 +41,7 @@ void execInvite(Command cmd, int fd, std::vector<Channel> & userchannel, std::ve
 void execTopic(Command cmd, int fd, std::vector<Channel> & userchannel, std::vector<User> & uservect);
 void execMode(Command & cmd, int fd, std::vector<User> & uservect, std::vector<Channel> & channelvect);
 void execPart(Command &cmd, int fd, std::vector<User> & uservect, std::vector<Channel> & channelvect);
-void execQuit(Command cmd, int fd, std::vector<User>& uservect, std::vector<Channel>& channelVect, std::vector<pollfd> &fds, int i);
+void execQuit(Command cmd, int fd, std::vector<User>& uservect, std::vector<Channel>& channelVect, std::vector<pollfd> &fds, int & i);
 void execPing(Command cmd, int fd, std::vector<User> & uservect);
 
 void deleteFromGroups(std::vector<Channel> & channelvect, int fd);

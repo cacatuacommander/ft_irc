@@ -1,6 +1,6 @@
 #include "../irc.hpp"
 
-void execQuit(Command cmd, int fd, std::vector<User>& uservect, std::vector<Channel>& channelVect, std::vector<pollfd> &fds, int i)
+void execQuit(Command cmd, int fd, std::vector<User>& uservect, std::vector<Channel>& channelVect, std::vector<pollfd> &fds, int & i)
 {
     int ind = searchVectWithFd(uservect, fd);
     if (ind == -1)
@@ -31,5 +31,6 @@ void execQuit(Command cmd, int fd, std::vector<User>& uservect, std::vector<Chan
     }
     close(fd);
 	fds.erase(fds.begin() + i);
+	--i;
     uservect.erase(uservect.begin() + ind);
 }
