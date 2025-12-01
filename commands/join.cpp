@@ -86,9 +86,9 @@ void addUserToChannel(Command & cmd, std::string & nickname, std::string & chann
 			channelvect[ch_i].removeFromInvites(fd);
 /* 			channelvect[ch_i].addToUsers(fd); // questa parte da fare solo se si vuole che invito bypassi anche userlimit
 			Inviare all’utente:la conferma di join
-		//il topic del canale
-		//la lista degli utenti (NAMES)
-		//Inviare agli altri utenti del canale un messaggio di JOIN dell’utente entrato
+			//il topic del canale
+			//la lista degli utenti (NAMES)
+			//Inviare agli altri utenti del canale un messaggio di JOIN dell’utente entrato
 			return ; */
 		}
 		else
@@ -126,9 +126,14 @@ void addUserToChannel(Command & cmd, std::string & nickname, std::string & chann
 			send(fd, reply.c_str(), reply.size(), 0);
 			return ;
 	}
+
+	std::cout << "aaa 7" << std::endl;
 	channelvect[ch_i].addToUsers(fd);
+
+	std::cout << "aaa 8" << std::endl;
 	succesfulJoinMessages(cmd, nickname, channelname, fd, channelvect, ch_i, uservect, i);
 
+	std::cout << "aaa 9" << std::endl;
 }
 
 void execJoin(Command & cmd, int fd, std::vector<User> & uservect, std::vector<Channel> & channelvect)
@@ -136,9 +141,10 @@ void execJoin(Command & cmd, int fd, std::vector<User> & uservect, std::vector<C
 	size_t i = searchVectWithFd(uservect, fd);
 	std::string nickname = uservect[i].getNickName();
 
+	std::cout << "aaa " << std::endl;
 	if (!argumentsArePresent(cmd, 1, nickname, fd))
 		return ;
-
+	std::cout << "aaa 1" << std::endl;
 	std::string channelname;
 	if (!cmd.params.empty())
 		channelname = cmd.params[0];
@@ -147,17 +153,20 @@ void execJoin(Command & cmd, int fd, std::vector<User> & uservect, std::vector<C
 
 	if (channelNameIsInvalid(cmd, fd, channelname, nickname))
 		return ;
-
+	std::cout << "aaa 2" << std::endl;
 	size_t ch_i = searchChannel(channelvect, channelname);
-
+	std::cout << "aaa 3" << std::endl;
 	if (ch_i  == channelvect.size())
 	{
 		createChannel(cmd, nickname, channelname, fd, channelvect, ch_i, uservect, i);//controllare anche e ci sono già troppi canali?
 	}
 	else
 	{
+			std::cout << "aaa 4" << std::endl;
 		if (userAlredyPresent(fd, channelvect, ch_i))
 			return ;//se utente è già presente nel canale, fa return senza mandare messaggi
+		std::cout << "aaa 5" << std::endl;
 		addUserToChannel(cmd, nickname, channelname, fd, channelvect, ch_i, uservect, i);
+		std::cout << "aaa 6" << std::endl;
 	}
 }

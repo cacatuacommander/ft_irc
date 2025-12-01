@@ -30,7 +30,7 @@ bool isValidNickname(std::string newnickname, int fd, std::string & oldnick)
 		}
 		i++;
 	}
-	if (newnickname == "admin" || newnickname == "root")
+	if (newnickname == "admin" || newnickname == "root" || newnickname == "bot")
 	{
 		//forse da levare ma ci sta
 		std::string reply = std::string(SERVER_NAME) + std::string(" 437 ") + oldnick + " " + newnickname + " :Nickname/channel is temporarily unavailable\r\n";
@@ -80,6 +80,10 @@ void execNick(Command cmd, int fd, std::vector<User> & uservect)
 		if (nicknameAlredyInUse(newnickname, fd, uservect, oldnick))
 			return ;
 		uservect[i].setNickName(newnickname);
+		for (size_t i = 0; i < channelvect.size(); i++)
+		{
+			if (channelvect[i].)
+		}
 		//std::cout << "nick aggiornato a:" << newnickname << std::endl;
 	}
 	else

@@ -35,12 +35,15 @@ void execUser(Command cmd, int fd, std::vector<User> & uservect);
 void execPrivMsg(Command cmd, int fd, std::vector<Channel>& channelVect, std::vector<User> & uservect);
 void execPass(Command cmd, int fd, std::vector<User> & uservect, std::string realpassword);
 void execJoin(Command & cmd, int fd, std::vector<User> & uservect, std::vector<Channel> & channelvect);
-void exec_command(Command cmd, std::vector<User> & uservect, std::vector<Channel> & userchannel, int fd, std::string serverpassword);
+void exec_command(Command cmd, std::vector<User> & uservect, std::vector<Channel> & channelvect, std::string serverpassword, std::vector<pollfd> &fds, int i);
 void execKick(Command cmd, int fd, std::vector<Channel> & userchannel, std::vector<User> & uservect);
 void execInvite(Command cmd, int fd, std::vector<Channel> & userchannel, std::vector<User> & uservect);
 void execTopic(Command cmd, int fd, std::vector<Channel> & userchannel, std::vector<User> & uservect);
 void execMode(Command & cmd, int fd, std::vector<User> & uservect, std::vector<Channel> & channelvect);
+void execPart(Command &cmd, int fd, std::vector<User> & uservect, std::vector<Channel> & channelvect);
+void execQuit(Command cmd, int fd, std::vector<User>& uservect, std::vector<Channel>& channelVect, std::vector<pollfd> &fds, int i);
 void execPing(Command cmd, int fd, std::vector<User> & uservect);
 
 void deleteFromGroups(std::vector<Channel> & channelvect, int fd);
 void trySendBuffer(std::vector<User> & uservect, std::vector<Channel> & channelvect, std::vector<pollfd> & fds, size_t & i);
+

@@ -5,12 +5,12 @@
 #define PORT 6667
 #define MAX_CLIENTS 10
 
-// volatile bool g_running = true;
+volatile bool g_running = true;
 
-// void handle_sigint(int)
-// {
-//     g_running = false;
-// }
+void handle_sigint(int)
+{
+    g_running = false;
+}
 
 int main(int argc, char** argv)
 {
@@ -18,12 +18,14 @@ int main(int argc, char** argv)
 	struct sockaddr_in address;
 	socklen_t addrlen = sizeof(address);
  
-	/* //gestione cntrl-C
-	struct sigaction sa;
-	sa.sa_handler = handle_sigint;
-	sigemptyset(&sa.sa_mask);
-	sa.sa_flags = 0;
-	sigaction(SIGINT, &sa, NULL); */
+
+    //gestione cntrl-C
+    struct sigaction sa;
+    sa.sa_handler = handle_sigint;
+    sigemptyset(&sa.sa_mask);
+    sa.sa_flags = 0;
+    sigaction(SIGINT, &sa, NULL);
+
 
 	if (argc < 2)//da modificare per aggiundere porta
 	{
@@ -72,7 +74,7 @@ int main(int argc, char** argv)
 	std::vector<User> uservect;
 	std::vector<Channel> channelvect;
 
-	while (true)
+	while (g_running)
 	{
 		for (size_t i = 0; i < fds.size(); ++i)
 		{
@@ -145,7 +147,7 @@ int main(int argc, char** argv)
 						uservect[index].buffer.append(buffer, bytes);
 						size_t pos;
 						std::cout << "stringa di input : " << uservect[index].buffer << std::endl;
-						while ((pos = uservect[index].buffer.find("\n")) != std::string::npos)
+						while ((pos = uservect[index].buffer.find("\r\n")) != std::string::npos)
 						{
 
 							std::string line = uservect[index].buffer.substr(0, pos);
@@ -164,10 +166,10 @@ int main(int argc, char** argv)
 								std::cout << " trailing: " << cmd.trailing << " valid: " << cmd.valid << std::endl; */
 								
 								
-							/* 	std::cerr << "\nfd: " << uservect[index].getFd() <<  std::endl;
+								std::cerr << "\nfd: " << uservect[index].getFd() <<  std::endl;
 								std::cerr << "nick: " << uservect[index].getNickName() <<  std::endl;
 								std::cerr << "user: " << uservect[index].getUserName() <<  std::endl;
-								std::cerr << "password: " << uservect[index].getPassword() <<  std::endl;  */
+								std::cerr << "password: " << uservect[index].getPassword() <<  std::endl; 
 
 /* 								Command cmd;
 								cmd.name = line;
@@ -180,7 +182,8 @@ int main(int argc, char** argv)
 									execNick(cmd, fds[i].fd, uservect);
 								else if (line[0] == 'U')
 									execUser(cmd, fds[i].fd, uservect); */
-								exec_command(cmd, uservect, channelvect, fds[i].fd, password);
+								exec_command(cmd, uservect, channelvect, password, fds ,i);
+								std::cout << "command executed" << std::endl;
 							}
 						}
 						if (fds[i].revents & POLLOUT)
