@@ -17,6 +17,8 @@ SRC =	server_mod.cpp \
 		commands/invite.cpp \
 		commands/topic.cpp \
 		commands/mode.cpp \
+		commands/part.cpp \
+		commands/quit.cpp \
 		channel.cpp \
 
 all: $(NAME)

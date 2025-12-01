@@ -1,5 +1,7 @@
 
 #include "irc.hpp"
+#include <sys/poll.h>
+#include <vector>
 
 bool argumentsArePresent(Command cmd, unsigned int numbofargneeded, std::string nickname, int fd)
 {
@@ -32,24 +34,28 @@ bool argumentsArePresent_mod(Command cmd, unsigned int numbofargneeded, std::str
 	return false;
 }
 
-void exec_command(Command cmd, std::vector<User> & uservect, std::vector<Channel> & channelvect, int fd, std::string serverpassword)
+void exec_command(Command cmd, std::vector<User> & uservect, std::vector<Channel> & channelvect, std::string serverpassword, std::vector<pollfd> &fds, int i)
 {
 	if (cmd.name == "PASS")
-		execPass(cmd, fd, uservect, serverpassword);
+		execPass(cmd, fds[i].fd, uservect, serverpassword);
 	if (cmd.name == "NICK")
-		execNick(cmd, fd, uservect);
+		execNick(cmd, fds[i].fd, uservect);
 	if (cmd.name == "USER")
-		execUser(cmd, fd, uservect);
+		execUser(cmd, fds[i].fd, uservect);
 	if (cmd.name == "JOIN")
-		execJoin(cmd, fd, uservect, channelvect);
+		execJoin(cmd, fds[i].fd, uservect, channelvect);
 	if (cmd.name == "PRIVMSG")
-		execPrivMsg(cmd, fd, channelvect, uservect);
+		execPrivMsg(cmd, fds[i].fd, channelvect, uservect);
 	if (cmd.name == "KICK")
-		execKick(cmd, fd, channelvect, uservect);
+		execKick(cmd, fds[i].fd, channelvect, uservect);
 	if (cmd.name == "INVITE")
-		execInvite(cmd, fd, channelvect, uservect);
+		execInvite(cmd, fds[i].fd, channelvect, uservect);
 	if (cmd.name == "TOPIC")
-		execTopic(cmd, fd, channelvect, uservect);
+		execTopic(cmd, fds[i].fd, channelvect, uservect);
 	if (cmd.name == "MODE")
-		execMode(cmd, fd, uservect, channelvect);
+		execMode(cmd, fds[i].fd, uservect, channelvect);
+	if (cmd.name == "PART")
+		execPart(cmd, fds[i].fd, uservect, channelvect);
+	if (cmd.name == "QUIT")
+		execQuit(cmd, fds[i].fd, uservect, channelvect, fds, i);
 }

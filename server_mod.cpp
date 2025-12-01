@@ -5,12 +5,12 @@
 #define PORT 6667
 #define MAX_CLIENTS 10
 
-// volatile bool g_running = true;
+volatile bool g_running = true;
 
-// void handle_sigint(int)
-// {
-//     g_running = false;
-// }
+void handle_sigint(int)
+{
+    g_running = false;
+}
 
 void deleteFromGroups(std::vector<Channel> & channelvect, int fd)
 {
@@ -38,12 +38,12 @@ int main(int argc, char** argv)
 	struct sockaddr_in address;
 	socklen_t addrlen = sizeof(address);
  
-    /* //gestione cntrl-C
+    //gestione cntrl-C
     struct sigaction sa;
     sa.sa_handler = handle_sigint;
     sigemptyset(&sa.sa_mask);
     sa.sa_flags = 0;
-    sigaction(SIGINT, &sa, NULL); */
+    sigaction(SIGINT, &sa, NULL);
 
 	if (argc < 2)//da modificare per aggiundere porta
 	{
@@ -92,7 +92,7 @@ int main(int argc, char** argv)
 	std::vector<User> uservect;
 	std::vector<Channel> channelvect;
 
-	while (true)
+	while (g_running)
 	{
 		int poll_count = poll(&fds[0], fds.size(), -1);
 		if (poll_count < 0)
@@ -180,7 +180,7 @@ int main(int argc, char** argv)
 									execNick(cmd, fds[i].fd, uservect);
 								else if (line[0] == 'U')
 									execUser(cmd, fds[i].fd, uservect); */
-								exec_command(cmd, uservect, channelvect, fds[i].fd, password);
+								exec_command(cmd, uservect, channelvect, password, fds ,i);
 							}
 						}
 						
