@@ -1,6 +1,37 @@
 #include "../irc.hpp"
 
-bool checkParamsPrvMsg(const Command &cmd, const std::string &nick, int fd, std::vector<User> &uservect, std::vector<Channel> &channelVect) {
+bool checkCmdParams(const std::string &nick, int fd, std::vector<User> &uservect, std::vector<Channel> &channelVect, std::string t)
+{
+    size_t ir;
+    if (t[0] != '#')
+    {
+        ir = searchVectWithNick(uservect, t);
+        if (ir == uservect.size())
+        {
+            std::string msg = ":" + std::string(SERVER_NAME) + " 401 " + nick + " " + t + " :No such nick\r\n";
+            send(fd, msg.c_str(), msg.size(), 0);
+            return false;
+        }
+    }
+    else {
+        ir = searchChannel(channelVect, t);
+        if (ir == channelVect.size())
+        {
+            std::string msg = ":" + std::string(SERVER_NAME) + " 403 " + nick + " " + t + " :No such channel\r\n";
+            send(fd, msg.c_str(), msg.size(), 0);
+            return false;
+        }
+        if (!channelVect[ir].userIsInChannel(fd))
+        {
+            std::string msg = ":" + std::string(SERVER_NAME) + " 404 " + nick + " " + t + " :Cannot send to channel\r\n";
+            send(fd, msg.c_str(), msg.size(), 0);
+            return false;
+        }
+    }
+    return true;
+}
+
+bool checkParamsPrvMsg(const Command &cmd, std::vector<std::string> multiParam, const std::string &nick, int fd, std::vector<User> &uservect, std::vector<Channel> &channelVect) {
     if (cmd.params.size() < 1)
     {
         std::string msg = ":" + std::string(SERVER_NAME) + " 411 " + nick + " :No recipient given (PRIVMSG)\r\n";
@@ -13,60 +44,51 @@ bool checkParamsPrvMsg(const Command &cmd, const std::string &nick, int fd, std:
         send(fd, msg.c_str(), msg.size(), 0);
         return false;
     }
-
-    size_t ir;
-    std::string target = cmd.params[0];
-    if (target[0] != '#')
+    for (size_t i = 0; i < multiParam.size(); i++)
     {
-        ir = searchVectWithNick(uservect, target);
-        if (ir == uservect.size())
-        {
-            std::string msg = ":" + std::string(SERVER_NAME) + " 401 " + nick + " " + target + " :No such nick\r\n";
-            send(fd, msg.c_str(), msg.size(), 0);
+        if (!checkCmdParams(nick, fd, uservect, channelVect, multiParam[i]))
             return false;
-        }
     }
-    else {
-        ir = searchChannel(channelVect, target);
-        if (ir == channelVect.size())
-        {
-            std::string msg = ":" + std::string(SERVER_NAME) + " 403 " + nick + " " + target + " :No such channel\r\n";
-            send(fd, msg.c_str(), msg.size(), 0);
-            return false;
-        }
-        if (!channelVect[ir].userIsInChannel(fd))
-        {
-            std::string msg = ":" + std::string(SERVER_NAME) + " 404 " + nick + " " + target + " :Cannot send to channel\r\n";
-            send(fd, msg.c_str(), msg.size(), 0);
-            return false;
-        }
-    }
-
     return true;
 }
 
-void execPrivMsg(Command cmd, int fd, std::vector<Channel>& channelVect, std::vector<User> & uservect)
-{
+void execPrivMsg(Command cmd, int fd, std::vector<Channel>& channelVect, std::vector<User> & uservect) {
     int is = searchVectWithFd(uservect, fd);
     std::string nick = uservect[is].getNickName().empty() ? "*" : uservect[is].getNickName();
-    if (!checkParamsPrvMsg(cmd, nick, fd, uservect, channelVect))
-        return ;
-    std::string target = cmd.params[0];
-    std::string msg = ":" + nick + " PRIVMSG " + target + " :" + cmd.trailing + "\r\n";
-    if (target[0] != '#')
+
+    std::vector<std::string> multiParam;
+    if (cmd.params[0].find(',') != std::string::npos)
     {
-        size_t ir = searchVectWithNick(uservect, target);
-        if (ir != uservect.size()) {
-            send(uservect[ir].getFd(), msg.c_str(), msg.size(), 0);
+        std::string target = cmd.params[0];
+        std::stringstream ss(target);
+        std::string t;
+        while (std::getline(ss, t, ','))
+        {
+            multiParam.push_back(t);
         }
-        return;
     }
     else
+        multiParam.push_back(cmd.params[0]);
+
+    if (!checkParamsPrvMsg(cmd, multiParam, nick, fd, uservect, channelVect))
+        return ;
+    for (size_t i = 0; i < multiParam.size(); i++)
     {
-        size_t ir = searchChannel(channelVect, target);
-        if (ir == channelVect.size()) {
-            //sendtoall che devo ancora fare
-            return ;
+        std::string target = multiParam[i];
+        std::string msg = ":" + nick + " PRIVMSG " + target + " :" + cmd.trailing + "\r\n";
+        if (target[0] != '#')
+        {
+            size_t ir = searchVectWithNick(uservect, target);
+            if (ir != uservect.size()) {
+                send(uservect[ir].getFd(), msg.c_str(), msg.size(), 0);
+            }
+        }
+        else
+        {
+            size_t ir = searchChannel(channelVect, target);
+            if (ir != channelVect.size()) {
+                channelVect[ir].sendToAll(msg, fd);
+            }
         }
     }
 }

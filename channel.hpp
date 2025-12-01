@@ -40,7 +40,7 @@ class Channel
 	void removeFromUsers(int fd);
 	void removeFromInvites(int fd);
 	void removeFromOperators(int fd);
-
+	
 	std::string getName() const;
 	std::string getPass() const;
 	std::string getTopic() const;
@@ -54,11 +54,16 @@ class Channel
 	bool reachedUserLimit() const;
 	bool searchFDinOperators(int fd);
 	bool removeUser(int fd);
+	void addUserToInviteList(int fd);
+	void changeTopic(std::string new_topic);
+
+	
+	bool checkPass(std::string & password) const;
+	void sendToAll(std::string message, int fd);
 
 	size_t getOperatorsSize() const;
 	size_t getUsersSize() const;
 
-	bool checkPass(std::string & password) const;
-	void sendToAll(std::string message);
+
 	std::string getListOfNicks(std::vector<User> & uservect) const;
 };

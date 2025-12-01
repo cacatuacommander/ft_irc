@@ -1,9 +1,8 @@
 #include "irc.hpp"
-#include <sstream>
 
 bool Parser::cmd_exist(const std::string& cmd) {
 	std::string cmd_list[] = {"PING", "PONG", "JOIN", "PART", "PRIVMSG", "QUIT", "MODE", "KICK", "INVITE", "TOPIC", "PASS", "NICK", "USER"};
-	for (int i = 0; i < 13; i++)//qua era 9 ho messo 13 che se no non controllava gli ultimi(che erano proprio nick e user aha) e ho separato ping e pong e join e part che sono comandi singoli(credo)
+	for (int i = 0; i < 13; i++)
 	{
 		if (cmd == cmd_list[i])
 			return true;
@@ -24,6 +23,7 @@ std::vector<User>::const_iterator userResearch(int fd, const std::vector<User>& 
 Command Parser::parse(const std::string& input, const std::vector<User>& usr_vec, const int fd) {
 	Command cmd;
 	cmd.valid = false;
+	cmd.ghost_trail = false;
 	std::string tmp = input;
 
 	std::vector<User>::const_iterator curr_usr = userResearch(fd, usr_vec);
@@ -44,6 +44,7 @@ Command Parser::parse(const std::string& input, const std::vector<User>& usr_vec
 	size_t pos = tmp.find(" :");
 	if (pos != std::string::npos)
 	{
+		cmd.ghost_trail = true;
 		cmd.trailing = tmp.substr(pos + 2);
 		tmp = tmp.substr(0, pos);
 	}
@@ -74,7 +75,7 @@ Command Parser::parse(const std::string& input, const std::vector<User>& usr_vec
 			}
 		}
 		else {
-			if (curr_usr->getUserName() == "" && tmpCmd != "PING / PONG" && tmpCmd != "QUIT" && tmpCmd != "PASS") {
+			if (curr_usr->getUserName() == "" && tmpCmd != "PING" && tmpCmd != "PONG" && tmpCmd != "QUIT" && tmpCmd != "PASS") {
 				std::string msg = ":" + std::string(SERVER_NAME) + " 451 " + nick + " :You have not registered\r\n";
 				send(fd, msg.c_str(), msg.size(), 0);
 				return cmd;

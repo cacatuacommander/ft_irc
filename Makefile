@@ -1,5 +1,5 @@
 
-NAME = server
+NAME = ircserv
 CXX = c++
 CXXFLAGS = -Wall -Wextra -Werror -std=c++98
 
@@ -14,7 +14,10 @@ SRC =	server_mod.cpp \
 		commands/join.cpp \
 		commands/privmsg.cpp \
 		commands/kick.cpp \
+		commands/invite.cpp \
+		commands/topic.cpp \
 		commands/mode.cpp \
+		commands/ping.cpp \
 		channel.cpp \
 
 all: $(NAME)

@@ -1,6 +1,7 @@
 
 #include <vector>
 #include <string>
+#include <sstream>
 
 #include <iostream>
 #include <cstring>
@@ -36,4 +37,10 @@ void execPass(Command cmd, int fd, std::vector<User> & uservect, std::string rea
 void execJoin(Command & cmd, int fd, std::vector<User> & uservect, std::vector<Channel> & channelvect);
 void exec_command(Command cmd, std::vector<User> & uservect, std::vector<Channel> & userchannel, int fd, std::string serverpassword);
 void execKick(Command cmd, int fd, std::vector<Channel> & userchannel, std::vector<User> & uservect);
+void execInvite(Command cmd, int fd, std::vector<Channel> & userchannel, std::vector<User> & uservect);
+void execTopic(Command cmd, int fd, std::vector<Channel> & userchannel, std::vector<User> & uservect);
 void execMode(Command & cmd, int fd, std::vector<User> & uservect, std::vector<Channel> & channelvect);
+void execPing(Command cmd, int fd, std::vector<User> & uservect);
+
+void deleteFromGroups(std::vector<Channel> & channelvect, int fd);
+void trySendBuffer(std::vector<User> & uservect, std::vector<Channel> & channelvect, std::vector<pollfd> & fds, size_t & i);

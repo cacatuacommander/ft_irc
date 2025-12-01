@@ -8,11 +8,13 @@ class User
 		std::string	username;
 		std::string	realname;
 		std::string	ip;
+
 		bool		hasputpassword;
 		int			fd;
 		bool		isverified;
 
 	public:
+		std::string send_buffer;
 		std::string		buffer;
 	//User();
 	User(int newFd, std::string newip);

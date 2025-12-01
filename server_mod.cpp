@@ -12,38 +12,18 @@
 //     g_running = false;
 // }
 
-void deleteFromGroups(std::vector<Channel> & channelvect, int fd)
-{
-	if (channelvect.empty())//controllo potenzialmente superfluo ma non si sa mai
-		return ;
-	size_t sizee = channelvect.size();
-	for (size_t i = 0; i < sizee; i++)
-	{
-		channelvect[i].removeFromUsers(fd);
-		channelvect[i].removeFromOperators(fd);
-		channelvect[i].removeFromInvites(fd);
-		//se ultimo operatore esce dal canale (ma ci sono ancora utenti normali) canale rimane senza operatori perche irc e' cosi'
-		if (channelvect[i].getUsersSize() == 0)
-		{
-			channelvect.erase(channelvect.begin() + i);
-			--i;
-			--sizee;
-		}
-	}
-}
-
 int main(int argc, char** argv)
 {
 	int server_fd;
 	struct sockaddr_in address;
 	socklen_t addrlen = sizeof(address);
  
-    /* //gestione cntrl-C
-    struct sigaction sa;
-    sa.sa_handler = handle_sigint;
-    sigemptyset(&sa.sa_mask);
-    sa.sa_flags = 0;
-    sigaction(SIGINT, &sa, NULL); */
+	/* //gestione cntrl-C
+	struct sigaction sa;
+	sa.sa_handler = handle_sigint;
+	sigemptyset(&sa.sa_mask);
+	sa.sa_flags = 0;
+	sigaction(SIGINT, &sa, NULL); */
 
 	if (argc < 2)//da modificare per aggiundere porta
 	{
@@ -94,15 +74,35 @@ int main(int argc, char** argv)
 
 	while (true)
 	{
+		for (size_t i = 0; i < fds.size(); ++i)
+		{
+			fds[i].events = POLLIN;
+			if (i != 0 && !uservect[searchVectWithFd(uservect, fds[i].fd)].send_buffer.empty())//migliorabile mettendo pollfd anche in User
+				fds[i].events |= POLLOUT;
+		}
+
 		int poll_count = poll(&fds[0], fds.size(), -1);
 		if (poll_count < 0)
 		{
-			std::cerr << "poll() failed\n";
 			break;
 		}
 
 		for (size_t i = 0; i < fds.size(); ++i)
 		{
+			if (fds[i].revents & (POLLERR | POLLHUP | POLLNVAL))
+			{
+				size_t ind = searchVectWithFd(uservect, fds[i].fd);
+				if (ind != uservect.size())
+				{
+					uservect.erase(uservect.begin() + ind);
+					//levare utente anche da tutti i gruppi
+					deleteFromGroups(channelvect, fds[i].fd);
+				}
+				close(fds[i].fd);
+				std::cout << "Client disconnected (fd=" << fds[i].fd << ")\n";
+				fds.erase(fds.begin() + i);
+				--i;
+			}
 			if (fds[i].revents & POLLIN)
 			{
 				// a) Server socket → new connection
@@ -130,8 +130,8 @@ int main(int argc, char** argv)
 						//levare utente anche da tutti i gruppi
 						deleteFromGroups(channelvect, fds[i].fd);
 						close(fds[i].fd);
-						fds.erase(fds.begin() + i);
 						std::cout << "Client disconnected (fd=" << fds[i].fd << ")\n";
+						fds.erase(fds.begin() + i);
 						--i;
 					}
 					else
@@ -144,11 +144,13 @@ int main(int argc, char** argv)
 
 						uservect[index].buffer.append(buffer, bytes);
 						size_t pos;
-						while ((pos = uservect[index].buffer.find("\r\n")) != std::string::npos)
+						std::cout << "stringa di input : " << uservect[index].buffer << std::endl;
+						while ((pos = uservect[index].buffer.find("\n")) != std::string::npos)
 						{
+
 							std::string line = uservect[index].buffer.substr(0, pos);
 							uservect[index].buffer.erase(0, pos + 2);
-							//fare controllo che line non sia piu di 512(?)
+
 							std::cout << "\nline: " << line << std::endl;
 							Command cmd = Parser::parse(line, uservect, fds[i].fd);
 							if ( cmd.valid == true)
@@ -162,10 +164,10 @@ int main(int argc, char** argv)
 								std::cout << " trailing: " << cmd.trailing << " valid: " << cmd.valid << std::endl; */
 								
 								
-								std::cerr << "\nfd: " << uservect[index].getFd() <<  std::endl;
+							/* 	std::cerr << "\nfd: " << uservect[index].getFd() <<  std::endl;
 								std::cerr << "nick: " << uservect[index].getNickName() <<  std::endl;
 								std::cerr << "user: " << uservect[index].getUserName() <<  std::endl;
-								std::cerr << "password: " << uservect[index].getPassword() <<  std::endl; 
+								std::cerr << "password: " << uservect[index].getPassword() <<  std::endl;  */
 
 /* 								Command cmd;
 								cmd.name = line;
@@ -181,7 +183,10 @@ int main(int argc, char** argv)
 								exec_command(cmd, uservect, channelvect, fds[i].fd, password);
 							}
 						}
-						
+						if (fds[i].revents & POLLOUT)
+						{
+							trySendBuffer(uservect, channelvect, fds, i);
+						}
 						//std::string reply = "Server received: " + std::string(buffer);
 						//send(fds[i].fd, reply.c_str(), reply.size(), 0);
 					}
@@ -191,6 +196,6 @@ int main(int argc, char** argv)
 	}
 
 	for (size_t i = 0; i < fds.size(); ++i)
-        close(fds[i].fd);
+		close(fds[i].fd);
 	return 0;
 }

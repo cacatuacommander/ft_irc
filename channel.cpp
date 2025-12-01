@@ -6,6 +6,7 @@
 size_t searchVectWithFd(std::vector<User> & uservect, int fd);
 
 Channel::Channel(int fd, std::string channelname) : name(channelname), topic(""), istopicrestricted(false), isinviteonly(false), password(""), userlimit(-1)
+
 {
 	users.push_back(fd);
 	operators.push_back(fd);
@@ -90,10 +91,12 @@ std::string Channel::getName() const
 	return this->name;
 }
 
+
 std::string Channel::getPass() const
 {
 	return this->password;
 }
+
 
 std::string Channel::getTopic() const
 {
@@ -102,10 +105,12 @@ std::string Channel::getTopic() const
 	return this->topic;
 }
 
+
 int Channel::getUserlimit() const
 {
 	return this->userlimit;
 }
+
 
 bool Channel::needsInvite() const
 {
@@ -188,32 +193,46 @@ bool Channel::checkPass(std::string & passwordtocheck) const
 	return false;
 }
 
-void Channel::sendToAll(std::string message)
+void Channel::sendToAll(std::string message, int fd)
 {
 	if (this->users.empty())//controllo che forse non serve
 		return ;
 	for (size_t i = 0; i < users.size(); i++)
 	{
-		send(this->users[i], message.c_str(), message.size(), 0);
+		if (fd != this->users[i])
+			send(this->users[i], message.c_str(), message.size(), 0);
 	}
 }
 
 bool Channel::removeUser(int fd)
 {
-	std::vector<int>::iterator it; it = std::find(users.begin(), users.end(), fd);
-	if (it != users.end())
-	{
-		users.erase(it);
-		return true;//ha senso questo qui?
-	}
 
+	std::vector<int>::iterator it;
 	it = std::find(operators.begin(), operators.end(), fd);
 	if (it != users.end())
 	{
 		operators.erase(it);
+	}
+	
+	it = std::find(users.begin(), users.end(), fd);
+	if (it != users.end())
+	{
+		users.erase(it);
 		return true;
 	}
+
 	return false;
+}
+
+void Channel::changeTopic(std::string new_topic)
+{
+	this->topic = new_topic;
+}
+
+
+void Channel::addUserToInviteList(int fd) 
+{
+	invites.push_back(fd);
 }
 
 bool Channel::searchFDinOperators(int fd)
@@ -231,7 +250,8 @@ std::string Channel::getListOfNicks(std::vector<User> & uservect) const
 	for (size_t i = 0; i < users.size(); i++)
 	{
 		if (i != 0)
-		listofnames += " ";
+			listofnames += " ";
+
 		if (std::find(this->operators.begin(), this->operators.end(), this->users[i]) != this->operators.end())
 			listofnames += "@";
 		listofnames += uservect[searchVectWithFd(uservect, this->users[i])].getNickName();

@@ -1,17 +1,17 @@
 #include "../irc.hpp"
 
-bool checkParamsKick(const Command &cmd, const std::string &nick, int fd, std::vector<User> &uservect, std::vector<Channel> &channelVect)
+bool checkParamsInvite(const Command &cmd, const std::string &nick, int fd, std::vector<User> &uservect, std::vector<Channel> &channelVect)
 {
     if (cmd.params.size() < 2)
     {
         std::string msg = ":" + std::string(SERVER_NAME) + " 461 " + nick +
-                          " KICK :Not enough parameters\r\n";
+                          " INVITE :Not enough parameters\r\n";
         send(fd, msg.c_str(), msg.size(), 0);
         return false;
     }
 
-    std::string channelName = cmd.params[0];
-    std::string targetNick = cmd.params[1];
+    std::string targetNick = cmd.params[0];
+    std::string channelName = cmd.params[1];
     size_t ch = searchChannel(channelVect, channelName);
     if (ch == channelVect.size())
     {
@@ -47,36 +47,36 @@ bool checkParamsKick(const Command &cmd, const std::string &nick, int fd, std::v
         return false;
     }
 
-    if (!channel.userIsInChannel(uservect[targetIdx].getFd()))
+    if (channel.userIsInChannel(uservect[targetIdx].getFd()))
     {
-        std::string msg = ":" + std::string(SERVER_NAME) + " 441 " + nick +
-                          " " + targetNick + " " + channelName +
-                          " :They aren't on that channel\r\n";
+        std::string msg = ":" + std::string(SERVER_NAME) + " 443 " + nick +
+                          " " + targetNick + " " + channelName + " :is already on channel\r\n";
         send(fd, msg.c_str(), msg.size(), 0);
         return false;
     }
-
     return true;
 }
 
-void execKick(Command cmd, int fd, std::vector<Channel>& channelVect, std::vector<User> & uservect) {
+void execInvite(Command cmd, int fd, std::vector<Channel>& channelVect, std::vector<User> & uservect) {
     size_t sender_index = searchVectWithFd(uservect, fd);
     std::string nick = uservect[sender_index].getNickName().empty() ? "*" : uservect[sender_index].getNickName();
-    if (!checkParamsKick(cmd, nick, fd, uservect, channelVect))
+    if (!checkParamsInvite(cmd, nick, fd, uservect, channelVect))
         return ;
-    size_t channel_index = searchChannel(channelVect, cmd.params[0]);
-    size_t target_index = searchVectWithNick(uservect, cmd.params[1]);
+    size_t channel_index = searchChannel(channelVect, cmd.params[1]);
+    size_t target_index = searchVectWithNick(uservect, cmd.params[0]);
     Channel &channel = channelVect[channel_index];
     User &sender = uservect[sender_index];
     User &target = uservect[target_index];
 
-    std::string kick_reason = cmd.trailing.empty() ? sender.getNickName() : cmd.trailing;
-    std::string msg = ":" + sender.getNickName() + "!" +
-                sender.getUserName() + "@" +
-                sender.getIp() + " KICK " +
-                channel.getName() + " " +
-                target.getNickName() + " :" + kick_reason;
-
-    channel.sendToAll(msg, fd);
-    channel.removeUser(target.getFd());
+    channel.addUserToInviteList(target.getFd());
+    std::string msg = ":" + std::string(SERVER_NAME) + " 341 " +
+                sender.getNickName() + " " +
+                target.getNickName() + " " +
+                channel.getName() + "\r\n";
+    
+    send(sender.getFd(), msg.c_str(), msg.size(), 0);
+    msg = ":" + sender.getNickName() + " INVITE " +
+            target.getNickName() + " " +
+            channel.getName() + "\r\n";
+    send(target.getFd(), msg.c_str(), msg.size(), 0);
 }
