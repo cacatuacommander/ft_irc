@@ -43,6 +43,7 @@ void execMode(Command & cmd, int fd, std::vector<User> & uservect, std::vector<C
 void execPart(Command &cmd, int fd, std::vector<User> & uservect, std::vector<Channel> & channelvect);
 void execQuit(Command cmd, int fd, std::vector<User>& uservect, std::vector<Channel>& channelVect, std::vector<pollfd> &fds, int & i);
 void execPing(Command cmd, int fd, std::vector<User> & uservect);
+void execBotCall(Command cmd, int fd, std::vector<Channel>& channelVect, std::vector<User> & uservect);
 
 void deleteFromGroups(std::vector<Channel> & channelvect, int fd);
 void trySendBuffer(std::vector<User> & uservect, std::vector<Channel> & channelvect, std::vector<pollfd> & fds, size_t & i);

@@ -6,6 +6,7 @@ void succesfulJoinMessages(Command & cmd, std::string & nickname, std::string & 
 
 	//:<nick>!<user>@<host> JOIN <channel>
 	std::string message = ":" + nickname + "!" + uservect[i].getUserName() + "@" + uservect[i].getIp() + " " + cmd.name + " " + channelname + "\r\n";
+	send(fd, message.c_str(), message.size(), 0);
 	channelvect[ch_i].sendToAll(message, fd);
 	//:<server> 332 <nick> <channel> :<topic>
 	std::string msg = ":" + std::string(SERVER_NAME) + std::string(" 332 ") + nickname + " " + channelname + " :" + channelvect[ch_i].getTopic() + "\r\n";
@@ -127,6 +128,8 @@ void addUserToChannel(Command & cmd, std::string & nickname, std::string & chann
 			return ;
 	}
 	channelvect[ch_i].addToUsers(fd);
+	if (nickname == "bot")
+		channelvect[ch_i].addToOperators(fd);
 	succesfulJoinMessages(cmd, nickname, channelname, fd, channelvect, ch_i, uservect, i);
 
 }

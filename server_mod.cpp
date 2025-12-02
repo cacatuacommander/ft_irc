@@ -147,7 +147,7 @@ int main(int argc, char** argv)
 						uservect[index].buffer.append(buffer, bytes);
 						size_t pos;
 						//std::cout << "stringa di input : " << uservect[index].buffer << std::endl;
-						while ((pos = uservect[index].buffer.find("\n")) != std::string::npos)
+						while ((pos = uservect[index].buffer.find("\r\n")) != std::string::npos)
 						{
 
 							std::string line = uservect[index].buffer.substr(0, pos);

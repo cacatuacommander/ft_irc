@@ -209,7 +209,7 @@ bool Channel::removeUser(int fd)
 
 	std::vector<int>::iterator it;
 	it = std::find(operators.begin(), operators.end(), fd);
-	if (it != users.end())
+	if (it != operators.end())
 	{
 		operators.erase(it);
 	}

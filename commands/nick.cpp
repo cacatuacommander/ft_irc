@@ -1,7 +1,7 @@
 
 #include "../irc.hpp"
 
-bool isValidNickname(std::string newnickname, int fd, std::string & oldnick)
+bool isValidNickname(std::string newnickname, int fd, std::string & oldnick, std::vector<User> & uservect)
 {
 	if (newnickname == "" || newnickname.length() < 1)
 	{
@@ -30,7 +30,7 @@ bool isValidNickname(std::string newnickname, int fd, std::string & oldnick)
 		}
 		i++;
 	}
-	if (newnickname == "admin" || newnickname == "root")
+	if (newnickname == "admin" || newnickname == "root" || (newnickname == "bot" && uservect.size() > 1))
 	{
 		//forse da levare ma ci sta
 		std::string reply = std::string(SERVER_NAME) + std::string(" 437 ") + oldnick + " " + newnickname + " :Nickname/channel is temporarily unavailable\r\n";
@@ -75,7 +75,7 @@ void execNick(Command cmd, int fd, std::vector<User> & uservect)
 		else
 			newnickname = cmd.trailing;
 
-		if (!isValidNickname(newnickname, fd, oldnick))
+		if (!isValidNickname(newnickname, fd, oldnick,uservect))
 			return ;
 		if (nicknameAlredyInUse(newnickname, fd, uservect, oldnick))
 			return ;

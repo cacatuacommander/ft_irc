@@ -55,7 +55,7 @@ bool checkParamsPrvMsg(const Command &cmd, std::vector<std::string> multiParam, 
 void execPrivMsg(Command cmd, int fd, std::vector<Channel>& channelVect, std::vector<User> & uservect) {
     int is = searchVectWithFd(uservect, fd);
     std::string nick = uservect[is].getNickName().empty() ? "*" : uservect[is].getNickName();
-
+    std::string username = uservect[is].getUserName().empty() ? "*" : uservect[is].getUserName();
     std::vector<std::string> multiParam;
     if (cmd.params[0].find(',') != std::string::npos)
     {
@@ -75,7 +75,7 @@ void execPrivMsg(Command cmd, int fd, std::vector<Channel>& channelVect, std::ve
     for (size_t i = 0; i < multiParam.size(); i++)
     {
         std::string target = multiParam[i];
-        std::string msg = ":" + nick + " PRIVMSG " + target + " :" + cmd.trailing + "\r\n";
+        std::string msg = ":" + nick + "!~" + username + "@" + "127.0.0.1 " +  "PRIVMSG " + target + " :" + cmd.trailing + "\r\n";
         if (target[0] != '#')
         {
             size_t ir = searchVectWithNick(uservect, target);
