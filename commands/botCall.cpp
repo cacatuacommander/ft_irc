@@ -59,7 +59,7 @@ void execBotCall(Command cmd, int fd, std::vector<Channel>& channelVect, std::ve
     Channel &channel = channelVect[channel_index];
     std::string msg = "The shaman was invoked... Let's wait for that old geezer\r\n";
 
-    channel.sendToAll(msg, fd);
+    channel.sendToAll(uservect, msg, fd);
     send(fd, msg.c_str(), msg.size(), 0);
 
     std::string bot_nick = "bot";

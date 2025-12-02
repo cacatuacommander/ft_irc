@@ -71,7 +71,7 @@ void deleteFromGroups(std::vector<Channel> & channelvect, int fd, std::vector<Us
 		channelvect[i].removeFromOperators(fd);
 		channelvect[i].removeFromInvites(fd);
 		//se ultimo operatore esce dal canale (ma ci sono ancora utenti normali) canale rimane senza operatori perche irc e' cosi'
-		if (channelvect[i].getUsersSize() == 0 || (channelvect[i].getUsersSize() == 1 && channelvect[i].getListOfNicks(uservect) == "bot"))
+		if (channelvect[i].getUsersSize() == 0 || (channelvect[i].getUsersSize() == 1 && channelvect[i].getListOfNicks(uservect) == "@bot"))
 		{
 			channelvect.erase(channelvect.begin() + i);
 			--i;

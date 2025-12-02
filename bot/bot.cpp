@@ -85,7 +85,7 @@ int main() {
 
     //CREAZIONE DEL SOCKET
     if ((sock_fd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
-        perror("Errore nella creazione del socket");
+        std::cerr << "Errore nella creazione del socket";
         return 1;
     }
 
@@ -96,7 +96,7 @@ int main() {
     
     //CONVERSIONE IP STRINGA -> BINARIO
     if (inet_pton(AF_INET, SERVER_IP, &server_addr.sin_addr) <= 0) {
-        perror("Indirizzo IP non valido/non supportato");
+        std::cerr << "Indirizzo IP non valido/non supportato";
         close(sock_fd);
         return 1;
     }
@@ -129,7 +129,7 @@ int main() {
             std::cout << "Connessione chiusa dal server.\n";
             break;
         } else {
-            perror("Errore di ricezione");
+            std::cerr << "Errore di ricezione";
             break;
         }
     }

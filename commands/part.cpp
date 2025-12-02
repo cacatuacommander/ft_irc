@@ -51,7 +51,7 @@ void execPart(Command & cmd, int fd,  std::vector<User>& users, std::vector<Chan
     std::string msg = ":" + nick + " PART " + channelName + " :" + trailing + "\r\n";
     chan.sendToAll(users, msg, fd);
     chan.removeUser(fd);
-    if (channels[ch_idx].getUsersSize() == 0 || (channels[ch_idx].getUsersSize() == 1 && channels[ch_idx].getListOfNicks(users) == "bot"))
+    if (channels[ch_idx].getUsersSize() == 0 || (channels[ch_idx].getUsersSize() == 1 && channels[ch_idx].getListOfNicks(users) == "@bot"))
     	channels.erase(channels.begin() + ch_idx);
     safe_send(users, fd, msg);
 }
