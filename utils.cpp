@@ -59,18 +59,19 @@ size_t searchChannel(std::vector<Channel> & channelvect, std::string & channelna
 	return i;
 }
 
-void deleteFromGroups(std::vector<Channel> & channelvect, int fd)
+void deleteFromGroups(std::vector<Channel> & channelvect, int fd, std::vector<User> & uservect, std::string msg)
 {
 	if (channelvect.empty())//controllo potenzialmente superfluo ma non si sa mai
 		return ;
 	size_t sizee = channelvect.size();
 	for (size_t i = 0; i < sizee; i++)
 	{
+		channelvect[i].sendToAll(uservect, msg, fd);
 		channelvect[i].removeFromUsers(fd);
 		channelvect[i].removeFromOperators(fd);
 		channelvect[i].removeFromInvites(fd);
 		//se ultimo operatore esce dal canale (ma ci sono ancora utenti normali) canale rimane senza operatori perche irc e' cosi'
-		if (channelvect[i].getUsersSize() == 0)
+		if (channelvect[i].getUsersSize() == 0 || (channelvect[i].getUsersSize() == 1 && channelvect[i].getListOfNicks(uservect) == "bot"))
 		{
 			channelvect.erase(channelvect.begin() + i);
 			--i;
@@ -79,19 +80,31 @@ void deleteFromGroups(std::vector<Channel> & channelvect, int fd)
 	}
 }
 
-void safe_send(std::vector<User> & uservect, size_t i, std::string & toAdd)
+void safe_send(std::vector<User> & uservect, int fd, std::string & toAdd)
 {
-	uservect[i].send_buffer += toAdd;
+	size_t i = searchVectWithFd(uservect, fd);
+	if (i < uservect.size())
+		uservect[i].addToSendBuffer(toAdd);
+	int n = send(fd, toAdd.c_str(), toAdd.size(), 0);
+	if (n > 0)
+	{
+		if (i < uservect.size() && static_cast<size_t>(n) < uservect[i].sendBufferSize())
+			uservect[i].sendBufferErase(0, n);
+	}
 }
 
 void trySendBuffer(std::vector<User> & uservect, std::vector<Channel> & channelvect, std::vector<pollfd> & fds, size_t & i)
 {
-	while (!uservect[i].send_buffer.empty())
+	while (i < uservect.size() && !uservect[i].sendBufferEmpty())
 	{
-		int n = send(uservect[i].getFd(), uservect[i].send_buffer.c_str(), uservect[i].send_buffer.size(), 0);
+		int n = send(uservect[i].getFd(), uservect[i].sendBufferCstr(), uservect[i].sendBufferSize(), 0);
 		if (n > 0)
 		{
-			uservect[i].send_buffer.erase(0, n);  // remove bytes that were sent
+			if (i < uservect.size() && static_cast<size_t>(n) < uservect[i].sendBufferSize())
+			{
+				std::cerr << " sei quiii111" << std::endl;
+				uservect[i].sendBufferErase(0, n);  // remove bytes that were sent
+			}
 		}
 		else if (errno == EAGAIN || errno == EWOULDBLOCK)
 		{
@@ -99,17 +112,21 @@ void trySendBuffer(std::vector<User> & uservect, std::vector<Channel> & channelv
 		}
 		else
 		{
-			size_t ind = searchVectWithFd(uservect, fds[i].fd);
+			std::cerr << " sei quaa " << std::endl;
+			(void) channelvect;
+			(void) fds;
+		/* 	size_t ind = searchVectWithFd(uservect, fds[i].fd);
 			if (ind != uservect.size())
 			{
 				uservect.erase(uservect.begin() + ind);
-				//levare utente anche da tutti i gruppi
-				deleteFromGroups(channelvect, fds[i].fd);
+				std::string msg = ":" + uservect[ind].getNickName() + uservect[ind].getUserName() + "@" + uservect[ind].getIp() + " QUIT : Client exited\r\n";
+				deleteFromGroups(channelvect, fds[i].fd, uservect, msg);
 			}
 			close(fds[i].fd);
 			std::cout << "Client disconnected (fd=" << fds[i].fd << ")\n";
 			fds.erase(fds.begin() + i);
-			--i;
-		}
+			--i;*/
+			break;
+		} 
 	}
 }

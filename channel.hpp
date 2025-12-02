@@ -59,11 +59,10 @@ class Channel
 
 	
 	bool checkPass(std::string & password) const;
-	void sendToAll(std::string message, int fd);
+	void sendToAll(std::vector<User> & uservect, std::string message, int fd);
 
 	size_t getOperatorsSize() const;
 	size_t getUsersSize() const;
-
 
 	std::string getListOfNicks(std::vector<User> & uservect) const;
 };

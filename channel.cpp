@@ -4,6 +4,7 @@
 #include <algorithm>
 
 size_t searchVectWithFd(std::vector<User> & uservect, int fd);
+void safe_send(std::vector<User> & uservect, int fd, std::string & toAdd);;
 
 Channel::Channel(int fd, std::string channelname) : name(channelname), topic(""), istopicrestricted(false), isinviteonly(false), password(""), userlimit(-1)
 
@@ -193,19 +194,20 @@ bool Channel::checkPass(std::string & passwordtocheck) const
 	return false;
 }
 
-void Channel::sendToAll(std::string message, int fd)
+void Channel::sendToAll(std::vector<User> & uservect, std::string message, int fd)
 {
 	if (this->users.empty())//controllo che forse non serve
 		return ;
 	for (size_t i = 0; i < users.size(); i++)
 	{
 		if (fd != this->users[i])
-			send(this->users[i], message.c_str(), message.size(), 0);
+			safe_send(uservect, this->users[i], message);
 	}
 }
 
 bool Channel::removeUser(int fd)
 {
+
 	std::vector<int>::iterator it;
 	it = std::find(operators.begin(), operators.end(), fd);
 	if (it != operators.end())

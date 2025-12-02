@@ -3,7 +3,7 @@
 #include <sys/poll.h>
 #include <vector>
 
-bool argumentsArePresent(Command cmd, unsigned int numbofargneeded, std::string nickname, int fd)
+bool argumentsArePresent(Command cmd, std::vector<User> & uservect, unsigned int numbofargneeded, std::string nickname, int fd)
 {
 	if (nickname == "")
 		nickname = "*";
@@ -15,7 +15,7 @@ bool argumentsArePresent(Command cmd, unsigned int numbofargneeded, std::string 
 		return true;
 
 	std::string reply = std::string(SERVER_NAME) + std::string(" 461 ") + nickname + " " + cmd.name + " :Not enough parameters\r\n";
-	send(fd, reply.c_str(), reply.size(), 0);
+	safe_send(uservect, fd, reply);
 
 	return false;
 }
@@ -39,7 +39,7 @@ void exec_command(Command cmd, std::vector<User> & uservect, std::vector<Channel
 	if (cmd.name == "PASS")
 		execPass(cmd, fds[i].fd, uservect, serverpassword);
 	if (cmd.name == "NICK")
-		execNick(cmd, fds[i].fd, uservect);
+		execNick(cmd, fds[i].fd, uservect, channelvect);
 	if (cmd.name == "USER")
 		execUser(cmd, fds[i].fd, uservect);
 	if (cmd.name == "JOIN")

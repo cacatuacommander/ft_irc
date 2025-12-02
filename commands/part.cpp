@@ -1,12 +1,12 @@
 #include "../irc.hpp"
 
-bool checkParamsPart(const Command &cmd, const std::string &nick, int fd, std::vector<Channel> &channels/*, std::vector<User> &users*/)
+bool checkParamsPart(const Command &cmd, const std::string &nick, int fd, std::vector<Channel> &channels, std::vector<User> &uservect)
 {
     if (cmd.params.empty())
     {
         std::string msg = ":" + std::string(SERVER_NAME) +
                           " 461 " + nick + " PART :Not enough parameters\r\n";
-        send(fd, msg.c_str(), msg.size(), 0);
+        safe_send(uservect, fd, msg);
         return false;
     }
 
@@ -17,7 +17,7 @@ bool checkParamsPart(const Command &cmd, const std::string &nick, int fd, std::v
     {
         std::string msg = ":" + std::string(SERVER_NAME) +
                           " 403 " + nick + " " + channelName + " :No such channel\r\n";
-        send(fd, msg.c_str(), msg.size(), 0);
+        safe_send(uservect, fd, msg);
         return false;
     }
 
@@ -27,7 +27,7 @@ bool checkParamsPart(const Command &cmd, const std::string &nick, int fd, std::v
         std::string msg = ":" + std::string(SERVER_NAME) +
                           " 442 " + nick + " " + channelName +
                           " :You're not on that channel\r\n";
-        send(fd, msg.c_str(), msg.size(), 0);
+        safe_send(uservect, fd, msg);
         return false;
     }
 
@@ -39,7 +39,7 @@ void execPart(Command & cmd, int fd,  std::vector<User>& users, std::vector<Chan
     size_t usr_idx = searchVectWithFd(users, fd);
     std::string nick = users[usr_idx].getNickName().empty() ? "*" : users[usr_idx].getNickName();
 
-    if (!checkParamsPart(cmd, nick, fd, channels/*, users*/))
+    if (!checkParamsPart(cmd, nick, fd, channels, users))
         return;
 
     std::string channelName = cmd.params[0];
@@ -49,8 +49,10 @@ void execPart(Command & cmd, int fd,  std::vector<User>& users, std::vector<Chan
     //User &usr = users[usr_idx];
     std::string trailing = cmd.trailing.empty() ? nick : cmd.trailing;
     std::string msg = ":" + nick + " PART " + channelName + " :" + trailing + "\r\n";
-    chan.sendToAll(msg, fd);
+    chan.sendToAll(users, msg, fd);
     chan.removeUser(fd);
-    send(fd, msg.c_str(), msg.size(), 0);
+    if (channels[ch_idx].getUsersSize() == 0 || (channels[ch_idx].getUsersSize() == 1 && channels[ch_idx].getListOfNicks(users) == "bot"))
+    	channels.erase(channels.begin() + ch_idx);
+    safe_send(users, fd, msg);
 }
 
