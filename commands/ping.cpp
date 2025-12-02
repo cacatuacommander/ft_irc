@@ -12,7 +12,7 @@ void execPing(Command cmd, int fd, std::vector<User> & uservect)
 	{
 		//:server 409 <nick> :No origin specified
 		std::string reply = ":" + std::string(SERVER_NAME) + std::string(" 409 ") + nickname + " " + cmd.name + " :No origin specified\r\n";
-		send(fd, reply.c_str(), reply.size(), 0);
+		safe_send(uservect, fd, reply);
 		return ;
 	}
 
@@ -26,10 +26,10 @@ void execPing(Command cmd, int fd, std::vector<User> & uservect)
 	{
 		//:server 409 <nick> :No origin specified
 		std::string reply = ":" + std::string(SERVER_NAME) + std::string(" 409 ") + nickname + " " + cmd.name + " :No origin specified\r\n";
-		send(fd, reply.c_str(), reply.size(), 0);
+		safe_send(uservect, fd, reply);
 		return ;
 	}
 	
 	std::string reply = "PONG " ":" + message + "\r\n";
-	send(fd, reply.c_str(), reply.size(), 0);
+	safe_send(uservect, fd, reply);
 }

@@ -6,7 +6,7 @@ bool checkParamsKick(const Command &cmd, const std::string &nick, int fd, std::v
     {
         std::string msg = ":" + std::string(SERVER_NAME) + " 461 " + nick +
                           " KICK :Not enough parameters\r\n";
-        send(fd, msg.c_str(), msg.size(), 0);
+        safe_send(uservect, fd, msg);
         return false;
     }
 
@@ -17,7 +17,7 @@ bool checkParamsKick(const Command &cmd, const std::string &nick, int fd, std::v
     {
         std::string msg = ":" + std::string(SERVER_NAME) + " 403 " + nick +
                           " " + channelName + " :No such channel\r\n";
-        send(fd, msg.c_str(), msg.size(), 0);
+        safe_send(uservect, fd, msg);
         return false;
     }
 
@@ -26,7 +26,7 @@ bool checkParamsKick(const Command &cmd, const std::string &nick, int fd, std::v
     {
         std::string msg = ":" + std::string(SERVER_NAME) + " 442 " + nick +
                           " " + channelName + " :You're not on that channel\r\n";
-        send(fd, msg.c_str(), msg.size(), 0);
+        safe_send(uservect, fd, msg);
         return false;
     }
 
@@ -34,7 +34,7 @@ bool checkParamsKick(const Command &cmd, const std::string &nick, int fd, std::v
     {
         std::string msg = ":" + std::string(SERVER_NAME) + " 482 " + nick +
                           " " + channelName + " :You're not channel operator\r\n";
-        send(fd, msg.c_str(), msg.size(), 0);
+        safe_send(uservect, fd, msg);
         return false;
     }
 
@@ -43,7 +43,7 @@ bool checkParamsKick(const Command &cmd, const std::string &nick, int fd, std::v
     {
         std::string msg = ":" + std::string(SERVER_NAME) + " 401 " + nick +
                           " " + targetNick + " :No such nick\r\n";
-        send(fd, msg.c_str(), msg.size(), 0);
+        safe_send(uservect, fd, msg);
         return false;
     }
 
@@ -52,14 +52,15 @@ bool checkParamsKick(const Command &cmd, const std::string &nick, int fd, std::v
         std::string msg = ":" + std::string(SERVER_NAME) + " 441 " + nick +
                           " " + targetNick + " " + channelName +
                           " :They aren't on that channel\r\n";
-        send(fd, msg.c_str(), msg.size(), 0);
+        safe_send(uservect, fd, msg);
         return false;
     }
 
     return true;
 }
 
-void execKick(Command cmd, int fd, std::vector<Channel>& channelVect, std::vector<User> & uservect) {
+void execKick(Command cmd, int fd, std::vector<Channel>& channelVect, std::vector<User> & uservect)
+{
     size_t sender_index = searchVectWithFd(uservect, fd);
     std::string nick = uservect[sender_index].getNickName().empty() ? "*" : uservect[sender_index].getNickName();
     if (!checkParamsKick(cmd, nick, fd, uservect, channelVect))
@@ -77,6 +78,6 @@ void execKick(Command cmd, int fd, std::vector<Channel>& channelVect, std::vecto
                 channel.getName() + " " +
                 target.getNickName() + " :" + kick_reason + "\r\n";
 
-    channel.sendToAll(msg, fd);
+    channel.sendToAll(uservect, msg, fd);
     channel.removeUser(target.getFd());
 }

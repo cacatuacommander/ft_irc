@@ -12,7 +12,7 @@ bool passwordAlredyPresent(int fd, std::vector<User> & uservect, int i)
 		if (temp == "")
 			temp = "*";
 		std::string reply = std::string(SERVER_NAME) + std::string(" 462 ") + temp + " :You may not reregister\r\n";
-		send(fd, reply.c_str(), reply.size(), 0);
+		safe_send(uservect, fd, reply);
 		return true;
 	}
 }
@@ -24,7 +24,7 @@ void execPass(Command cmd, int fd, std::vector<User> & uservect, std::string rea
 	{
 		if (passwordAlredyPresent(fd, uservect, i))
 			return ;
-		if (!argumentsArePresent(cmd, 1, uservect[i].getNickName(), fd))
+		if (!argumentsArePresent(cmd, uservect, 1, uservect[i].getNickName(), fd))
 			return ;
 
 		std::string newpassword;
@@ -39,7 +39,7 @@ void execPass(Command cmd, int fd, std::vector<User> & uservect, std::string rea
 		else
 		{
 			std::string reply = std::string(SERVER_NAME) + std::string(" 464 ") + "*" + " :Password incorrect\r\n";
-			send(fd, reply.c_str(), reply.size(), 0);
+			safe_send(uservect, fd, reply);
 		}
 	}
 	else

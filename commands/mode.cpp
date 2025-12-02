@@ -6,11 +6,9 @@
 #include <climits>
 #include <limits>
 
-void getCurrentChannelStatus(std::string & nickname, std::string & channelname, size_t ch_i, std::vector<Channel> & channelvect, int fd)
+void getCurrentChannelStatus(std::string & nickname, std::string & channelname, size_t ch_i, std::vector<Channel> & channelvect, int fd, std::vector<User> & uservect)
 {
-	std::string reply = ":" + std::string(SERVER_NAME) + std::string(" 324 ") + nickname + " " + channelname ;
-	if (channelvect[ch_i].needsInvite() || channelvect[ch_i].isTopicResticted() || channelvect[ch_i].needsPass() || (channelvect[ch_i].getUserlimit() > 0))
-		reply += " +";
+	std::string reply = ":" + std::string(SERVER_NAME) + std::string(" 324 ") + nickname + " " + channelname + " +";
 	if (channelvect[ch_i].needsInvite())
 		reply += "i";
 	if (channelvect[ch_i].isTopicResticted())
@@ -30,7 +28,7 @@ void getCurrentChannelStatus(std::string & nickname, std::string & channelname, 
 		reply += " " + oss.str();
 	}
 	reply += "\r\n";
-	send(fd, reply.c_str(), reply.size(), 0);
+	safe_send(uservect, fd, reply);
 }
 
 bool ChannelPassIsValid(std::string newpass)
@@ -47,19 +45,19 @@ bool ChannelPassIsValid(std::string newpass)
 	return true;
 }
 
-bool addNewPassToChannel(Command & cmd, int fd, std::vector<Channel> & channelvect, size_t & ch_i, size_t & i2, std::string nickname)
+bool addNewPassToChannel(Command & cmd, int fd, std::vector<Channel> & channelvect, size_t & ch_i, size_t & i2, std::string nickname, std::vector<User> & uservect)
 {
 	if (i2 >= cmd.params.size() || cmd.params[i2] == "")
 	{
 		std::string reply = ":" + std::string(SERVER_NAME) + std::string(" 461 ") + nickname + " " + cmd.name + " :Not enough parameters\r\n";
-		send(fd, reply.c_str(), reply.size(), 0);
+		safe_send(uservect, fd, reply);
 		return false;
 	}
 	if (!ChannelPassIsValid(cmd.params[i2]))
 	{
 		//:irc.example.com 696 mario #chat k p@ss :Invalid key parameter
 		std::string reply = ":" + std::string(SERVER_NAME) + std::string(" 696 ") + nickname + " " + cmd.params[0] + " k " + cmd.params[i2] + " :Invalid key parameter\r\n";
-		send(fd, reply.c_str(), reply.size(), 0);
+		safe_send(uservect, fd, reply);
 		return false;
 	}
 	channelvect[ch_i].setPass(cmd.params[i2]);
@@ -72,17 +70,17 @@ bool addNewOperatorToChannel(Command & cmd, int fd, std::vector<Channel> & chann
 	if (i2 >= cmd.params.size() || cmd.params[i2] == "")
 	{
 		std::string reply = ":" + std::string(SERVER_NAME) + std::string(" 461 ") + nickname + " " + cmd.name + " :Not enough parameters\r\n";
-		send(fd, reply.c_str(), reply.size(), 0);
+		safe_send(uservect, fd, reply);
 		return false;
 	}
-	std::cout << " param i2: " << cmd.params[i2] << " i2: " << i2 << std::endl; 
+	//std::cout << " param i2: " << cmd.params[i2] << " i2: " << i2 << std::endl; 
 	size_t newoperatorindex = searchVectWithNick(uservect, cmd.params[i2]);
-	std::cout << " fddddddd: " << i2 << std::endl; 
+	//std::cout << " fddddddd: " << i2 << std::endl; 
 	if (newoperatorindex == uservect.size())
 	{
 		//:server 401 <nick> Dan :No such nick/channel
 		std::string reply = ":" + std::string(SERVER_NAME) + std::string(" 401 ") + nickname + " " + cmd.params[i2] + " :No such nick/channel\r\n";
-		send(fd, reply.c_str(), reply.size(), 0);
+		safe_send(uservect, fd, reply);
 		return false;
 	}
 	int newoperatorfd = uservect[newoperatorindex].getFd();
@@ -90,7 +88,7 @@ bool addNewOperatorToChannel(Command & cmd, int fd, std::vector<Channel> & chann
 	{
 		//:server 441 <nick> Dan #chat :They aren't on that channel
 		std::string reply = ":" + std::string(SERVER_NAME) + std::string(" 441 ") + nickname + " " + cmd.params[i2] + " " + cmd.params[0] + " :They aren't on that channel\r\n";
-		send(fd, reply.c_str(), reply.size(), 0);
+		safe_send(uservect, fd, reply);
 		return false;
 	}
 	channelvect[ch_i].addToOperators(newoperatorfd);
@@ -103,7 +101,7 @@ bool removeOperatorFromChannel(Command & cmd, int fd, std::vector<Channel> & cha
 	if (i2 >= cmd.params.size() || cmd.params[i2] == "")
 	{
 		std::string reply = ":" + std::string(SERVER_NAME) + std::string(" 461 ") + nickname + " " + cmd.name + " :Not enough parameters\r\n";
-		send(fd, reply.c_str(), reply.size(), 0);
+		safe_send(uservect, fd, reply);
 		return false;
 	}
 	size_t operatortoremoveindex = searchVectWithNick(uservect, cmd.params[i2]);
@@ -111,7 +109,7 @@ bool removeOperatorFromChannel(Command & cmd, int fd, std::vector<Channel> & cha
 	{
 		//:server 401 <nick> Dan :No such nick/channel
 		std::string reply = ":" + std::string(SERVER_NAME) + std::string(" 401 ") + nickname + " " + cmd.params[i2] + " :No such nick/channel\r\n";
-		send(fd, reply.c_str(), reply.size(), 0);
+		safe_send(uservect, fd, reply);
 		return false;
 	}
 	int operatortoremovefd = uservect[operatortoremoveindex].getFd();
@@ -119,21 +117,21 @@ bool removeOperatorFromChannel(Command & cmd, int fd, std::vector<Channel> & cha
 	{
 		//:server 441 <nick> Dan #chat :They aren't on that channel
 		std::string reply = ":" + std::string(SERVER_NAME) + std::string(" 441 ") + nickname + " " + cmd.params[i2] + " " + cmd.params[0] + " :They aren't on that channel\r\n";
-		send(fd, reply.c_str(), reply.size(), 0);
+		safe_send(uservect, fd, reply);
 		return false;
 	}
 	if (!channelvect[ch_i].userIsInOperators(operatortoremovefd))
 	{
 		//::server 696 <nick> #chat o Bob :Invalid mode parameter
 		std::string reply = ":" + std::string(SERVER_NAME) + std::string(" 696 ") + nickname + " " + cmd.params[0] + " o " + cmd.params[i2] + " :Invalid mode parameter\r\n";
-		send(fd, reply.c_str(), reply.size(), 0);
+		safe_send(uservect, fd, reply);
 		return false;
 	}
 	if (channelvect[ch_i].getOperatorsSize() == 1)
 	{
 		//:irc.server.net 482 mionick #canale :You're the last channel operator
 		std::string reply = ":" + std::string(SERVER_NAME) + std::string(" 482 ") + nickname + " " + cmd.params[0] + " :You're the last channel operator\r\n";
-		send(fd, reply.c_str(), reply.size(), 0);
+		safe_send(uservect, fd, reply);
 		return false;
 	}
 	channelvect[ch_i].removeFromOperators(operatortoremovefd);
@@ -177,12 +175,12 @@ bool isAValidNumber(std::string numb, size_t & newnumb)
 }
 
 
-bool SetNewUserlimitForChannel(Command & cmd, int fd, std::vector<Channel> & channelvect, size_t & ch_i, size_t & i2, std::string nickname)
+bool SetNewUserlimitForChannel(Command & cmd, int fd, std::vector<Channel> & channelvect, std::vector<User> & uservect, size_t & ch_i, size_t & i2, std::string nickname)
 {
 	if (i2 >= cmd.params.size() || cmd.params[i2] == "")
 	{
 		std::string reply = ":" + std::string(SERVER_NAME) + std::string(" 461 ") + nickname + " " + cmd.name + " :Not enough parameters\r\n";
-		send(fd, reply.c_str(), reply.size(), 0);
+		safe_send(uservect, fd, reply);
 		return false;
 	}
 	size_t newlimit;
@@ -190,7 +188,7 @@ bool SetNewUserlimitForChannel(Command & cmd, int fd, std::vector<Channel> & cha
 	{
 		//:server 696 <nick> #channel l <number> :Invalid limit
 		std::string reply = ":" + std::string(SERVER_NAME) + std::string(" 696 ") + nickname + " " + cmd.name + " l " + cmd.params[i2] + " :Invalid limit\r\n";
-		send(fd, reply.c_str(), reply.size(), 0);
+		safe_send(uservect, fd, reply);
 		return false;
 	}
 
@@ -199,7 +197,7 @@ bool SetNewUserlimitForChannel(Command & cmd, int fd, std::vector<Channel> & cha
 	{
 		//:server 696 <nick> #channel l <number> :Invalid limit
 		std::string reply = ":" + std::string(SERVER_NAME) + std::string(" 696 ") + nickname + " " + cmd.name + " l " + cmd.params[i2] + " :Invalid limit\r\n";
-		send(fd, reply.c_str(), reply.size(), 0);
+		safe_send(uservect, fd, reply);
 		return false;
 	}
 	channelvect[ch_i].setUserLimit(newlimit);
@@ -219,7 +217,7 @@ bool positivemode(Command & cmd, int fd, std::vector<Channel> & channelvect, std
 	}
 	else if (cmd.params[z][j] == 'k')
 	{
-		if (!addNewPassToChannel(cmd, fd, channelvect, ch_i, i2, nickname))
+		if (!addNewPassToChannel(cmd, fd, channelvect, ch_i, i2, nickname, uservect))
 			return false;
 	}
 	else if (cmd.params[z][j] == 'o')
@@ -229,14 +227,14 @@ bool positivemode(Command & cmd, int fd, std::vector<Channel> & channelvect, std
 	}
 	else if (cmd.params[z][j] == 'l')
 	{
-		if (!SetNewUserlimitForChannel(cmd, fd, channelvect, ch_i, i2, nickname))
+		if (!SetNewUserlimitForChannel(cmd, fd, channelvect, uservect, ch_i, i2, nickname))
 			return false;
 	}
 		else
 	{
 		//:server 472 <nick> l :is unknown mode char to me
 		std::string reply = ":" + std::string(SERVER_NAME) + std::string(" 472 ") + nickname + " " + cmd.params[z][j - 1] + " :is unknown mode char to me\r\n";
-		send(fd, reply.c_str(), reply.size(), 0);
+		safe_send(uservect, fd, reply);
 		return false;
 	}
 	return true;
@@ -269,7 +267,7 @@ bool negativemode(Command & cmd, int fd, std::vector<Channel> & channelvect, std
 	{
 		//:server 472 <nick> l :is unknown mode char to me
 		std::string reply = ":" + std::string(SERVER_NAME) + std::string(" 472 ") + nickname + " " + cmd.params[z][j - 1] + " :is unknown mode char to me\r\n";
-		send(fd, reply.c_str(), reply.size(), 0);
+		safe_send(uservect, fd, reply);
 		return false;
 	}
 	return true;
@@ -287,7 +285,7 @@ void execMode(Command & cmd, int fd, std::vector<User> & uservect, std::vector<C
 	{
 		//461 <nick> MODE :Not enough parameters
 		std::string reply = ":" + std::string(SERVER_NAME) + std::string(" 461 ") + nickname + " " + cmd.name + " :Not enough parameters\r\n";
-		send(fd, reply.c_str(), reply.size(), 0);
+		safe_send(uservect, fd, reply);
 		return ;
 	}
 
@@ -297,7 +295,7 @@ void execMode(Command & cmd, int fd, std::vector<User> & uservect, std::vector<C
 	else
 		channelname = cmd.trailing;
 
-	if (channelNameIsInvalid(cmd, fd, channelname, nickname))
+	if (channelNameIsInvalid(cmd, fd, channelname, nickname, uservect))
 		return ;
 	
 	size_t ch_i = searchChannel(channelvect, channelname);
@@ -305,7 +303,7 @@ void execMode(Command & cmd, int fd, std::vector<User> & uservect, std::vector<C
 	{
 		//:server 403 <nick> #nonexistent :No such channel
 		std::string reply = ":" + std::string(SERVER_NAME) + std::string(" 403 ") + nickname + " " + cmd.params[0] + " :No such channel\r\n";
-		send(fd, reply.c_str(), reply.size(), 0);
+		safe_send(uservect, fd, reply);
 		return ;
 	}
 
@@ -313,7 +311,7 @@ void execMode(Command & cmd, int fd, std::vector<User> & uservect, std::vector<C
 	{
 		//:server 442 <nick> #chat :You're not on that channel
 		std::string reply = ":" + std::string(SERVER_NAME) + std::string(" 442 ") + nickname + " " + cmd.params[0] + " :You're not on that channel\r\n";
-		send(fd, reply.c_str(), reply.size(), 0);
+		safe_send(uservect, fd, reply);
 		return ;
 	}
 
@@ -321,7 +319,7 @@ void execMode(Command & cmd, int fd, std::vector<User> & uservect, std::vector<C
 	{
 		//caso in cui c'e solo nome canale e si mostrano i permessi attuali
 		//:server 324 <nick> #chat +ntkl password123 25
-		getCurrentChannelStatus(nickname, channelname, ch_i, channelvect, fd);
+		getCurrentChannelStatus(nickname, channelname, ch_i, channelvect, fd, uservect);
 		return ;
 	}
 
@@ -329,7 +327,7 @@ void execMode(Command & cmd, int fd, std::vector<User> & uservect, std::vector<C
 	{
 		//:server 482 <nick> #chat :You're not channel operator
 		std::string reply = ":" + std::string(SERVER_NAME) + std::string(" 482 ") + nickname + " " + cmd.params[0] + " :You're not channel operator\r\n";
-		send(fd, reply.c_str(), reply.size(), 0);
+		safe_send(uservect, fd, reply);
 		return ;
 	}
 
@@ -340,7 +338,7 @@ void execMode(Command & cmd, int fd, std::vector<User> & uservect, std::vector<C
 	{
 		//:server 472 <nick> l :is unknown mode char to me
 		std::string reply = ":" + std::string(SERVER_NAME) + std::string(" 472 ") + nickname + " " + cmd.params[0][0] + " :is unknown mode char to me\r\n";
-		send(fd, reply.c_str(), reply.size(), 0);
+		safe_send(uservect, fd, reply);
 		return ;
 	}
 
@@ -364,7 +362,7 @@ void execMode(Command & cmd, int fd, std::vector<User> & uservect, std::vector<C
 				{
 					//:server 472 <nick> l :is unknown mode char to me
 					std::string reply = ":" + std::string(SERVER_NAME) + std::string(" 472 ") + nickname + " " + cmd.params[z][j - 1] + " :is unknown mode char to me\r\n";
-					send(fd, reply.c_str(), reply.size(), 0);
+					safe_send(uservect, fd, reply);
 					return ;
 				}
 				if (!positivemode(cmd, fd, channelvect, uservect, ch_i, i2, nickname, z, j))
@@ -379,7 +377,7 @@ void execMode(Command & cmd, int fd, std::vector<User> & uservect, std::vector<C
 				{
 					//:server 472 <nick> l :is unknown mode char to me
 					std::string reply = ":" + std::string(SERVER_NAME) + std::string(" 472 ") + nickname + " " + cmd.params[z][j - 1] + " :is unknown mode char to me\r\n";
-					send(fd, reply.c_str(), reply.size(), 0);
+					safe_send(uservect, fd, reply);
 					return ;
 				}
 				if (!negativemode(cmd, fd, channelvect, uservect, ch_i, i2, nickname, z, j))
@@ -402,7 +400,7 @@ void execMode(Command & cmd, int fd, std::vector<User> & uservect, std::vector<C
 			{
 				//:server 472 <nick> l :is unknown mode char to me
 				std::string reply = ":" + std::string(SERVER_NAME) + std::string(" 472 ") + nickname + " " + cmd.params[z][j - 1] + " :is unknown mode char to me\r\n";
-				send(fd, reply.c_str(), reply.size(), 0);
+				safe_send(uservect, fd, reply);
 				return ;
 			}
 			j++;

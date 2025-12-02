@@ -3,20 +3,25 @@
 
 void succesfulJoinMessages(Command & cmd, std::string & nickname, std::string & channelname, int fd, std::vector<Channel> & channelvect, size_t ch_i, std::vector<User> & uservect, size_t i)
 {
-
 	//:<nick>!<user>@<host> JOIN <channel>
 	std::string message = ":" + nickname + "!" + uservect[i].getUserName() + "@" + uservect[i].getIp() + " " + cmd.name + " " + channelname + "\r\n";
-	send(fd, message.c_str(), message.size(), 0);
-	channelvect[ch_i].sendToAll(message, fd);
+
+	safe_send(uservect, fd, message);
+	channelvect[ch_i].sendToAll(uservect, message, fd);
+
 	//:<server> 332 <nick> <channel> :<topic>
-	std::string msg = ":" + std::string(SERVER_NAME) + std::string(" 332 ") + nickname + " " + channelname + " :" + channelvect[ch_i].getTopic() + "\r\n";
-	send(fd, msg.c_str(), msg.size(), 0);
+	std::string msg;
+	if (channelvect[ch_i].getTopic() == "No topic is set")
+		msg = ":" + std::string(SERVER_NAME) + std::string(" 331 ") + nickname + " " + channelname + " :No topic is set\r\n";
+	else
+		msg = ":" + std::string(SERVER_NAME) + std::string(" 332 ") + nickname + " " + channelname + " :" + channelvect[ch_i].getTopic() + "\r\n";
+	safe_send(uservect, fd, msg);
 	//:<server> 353 <nick> = <channel> :<space-separated nicks>
 	msg = ":" + std::string(SERVER_NAME) + std::string(" 353 ") + nickname + " = " + channelname + " :" + channelvect[ch_i].getListOfNicks(uservect) + "\r\n";
-	send(fd, msg.c_str(), msg.size(), 0);
+	safe_send(uservect, fd, msg);
 	//:<server> 366 <nick> <channel> :End of /NAMES list.
 	msg = ":" + std::string(SERVER_NAME) + std::string(" 366 ") + nickname + " " + channelname + " :End of /NAMES list.\r\n";
-	send(fd, msg.c_str(), msg.size(), 0);
+	safe_send(uservect, fd, msg);
 }
 
 bool channelAlredyExists(std::vector<Channel> & channelvect, std::string & newchannelname)
@@ -40,18 +45,18 @@ void createChannel(Command & cmd, std::string & nickname, std::string & channeln
 	succesfulJoinMessages(cmd, nickname, channelname, fd, channelvect, ch_i, uservect, i);
 }
 
-bool channelNameIsInvalid(Command & cmd, int fd, std::string & channelname, std::string & nickname)
+bool channelNameIsInvalid(Command & cmd, int fd, std::string & channelname, std::string & nickname, std::vector<User> & uservect)
 {
 	if (channelname == "")
 	{
 		std::string reply = ":" + std::string(SERVER_NAME) + std::string(" 461 ") + nickname + " " + cmd.name + " :Not enough parameters\r\n";
-		send(fd, reply.c_str(), reply.size(), 0);
+		safe_send(uservect, fd, reply);
 		return true;
 	}
 	else if ((channelname.size() < 2) || channelname.size() > 50 || channelname[0] != '#')//:server 476 nick ciao :Bad Channel Mask
 	{
 		std::string reply = ":" + std::string(SERVER_NAME) + std::string(" 476 ") + nickname + " " + channelname + " :Bad Channel Mask\r\n";
-		send(fd, reply.c_str(), reply.size(), 0);
+		safe_send(uservect, fd, reply);
 		return true;	
 	}
 
@@ -63,7 +68,7 @@ bool channelNameIsInvalid(Command & cmd, int fd, std::string & channelname, std:
 			channelname[i] == '_' || channelname[i] == '-'))
 		{
 			std::string reply = ":" + std::string(SERVER_NAME) + std::string(" 476 ") + nickname + " " + channelname + " :Bad Channel Mask\r\n";
-			send(fd, reply.c_str(), reply.size(), 0);
+			safe_send(uservect, fd, reply);
 			return true;
 		}
 		i++;
@@ -96,7 +101,7 @@ void addUserToChannel(Command & cmd, std::string & nickname, std::string & chann
 		{
 			//:<server> 473 <nick> <channel> :Cannot join channel (+i)
 			std::string msg = ":" + std::string(SERVER_NAME) + std::string(" 473 ") + nickname + " " + channelname + " :Cannot join channel (+i)\r\n";
-			send(fd, msg.c_str(), msg.size(), 0);
+			safe_send(uservect, fd, msg);
 			return ;
 		}
 	}
@@ -105,7 +110,7 @@ void addUserToChannel(Command & cmd, std::string & nickname, std::string & chann
 		if (!argumentsArePresent_mod(cmd, 2, nickname))//checks password exist
 		{
 			std::string reply = ":" + std::string(SERVER_NAME) + std::string(" 475 ") + nickname + " " + channelname + " :Cannot join channel (+k)\r\n";
-			send(fd, reply.c_str(), reply.size(), 0);
+			safe_send(uservect, fd, reply);
 			return ;
 		}
 		std::string password;
@@ -117,14 +122,14 @@ void addUserToChannel(Command & cmd, std::string & nickname, std::string & chann
 		if (password == "" || !channelvect[ch_i].checkPass(password))
 		{
 			std::string reply = ":" + std::string(SERVER_NAME) + std::string(" 475 ") + nickname + " " + channelname + " :Cannot join channel (+k)\r\n";
-			send(fd, reply.c_str(), reply.size(), 0);
+			safe_send(uservect, fd, reply);
 			return ;
 		}
 	}
 	if (channelvect[ch_i].reachedUserLimit())
 	{
 			std::string reply = ":" + std::string(SERVER_NAME) + std::string(" 471 ") + nickname + " " + channelname + " :Cannot join channel (+l)\r\n";
-			send(fd, reply.c_str(), reply.size(), 0);
+			safe_send(uservect, fd, reply);
 			return ;
 	}
 	channelvect[ch_i].addToUsers(fd);
@@ -139,7 +144,7 @@ void execJoin(Command & cmd, int fd, std::vector<User> & uservect, std::vector<C
 	size_t i = searchVectWithFd(uservect, fd);
 	std::string nickname = uservect[i].getNickName();
 
-	if (!argumentsArePresent(cmd, 1, nickname, fd))
+	if (!argumentsArePresent(cmd, uservect, 1, nickname, fd))
 		return ;
 
 	std::string channelname;
@@ -148,7 +153,7 @@ void execJoin(Command & cmd, int fd, std::vector<User> & uservect, std::vector<C
 	else
 		channelname = cmd.trailing;
 
-	if (channelNameIsInvalid(cmd, fd, channelname, nickname))
+	if (channelNameIsInvalid(cmd, fd, channelname, nickname, uservect))
 		return ;
 
 	size_t ch_i = searchChannel(channelvect, channelname);

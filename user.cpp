@@ -30,6 +30,60 @@ void User::setIsVerified()
 	this->isverified = true;
 }
 
+void User::addToSendBuffer(std::string & toAdd)
+{
+	this->send_buffer += toAdd;
+}
+
+void User::sendBufferErase(int pos, int n)
+{
+	this->send_buffer.erase(pos, n);
+}
+
+void User::bufferAppend(char * buf, ssize_t n)
+{
+	this->buffer.append(buf, n);
+}
+
+std::string User::bufferSubstr(size_t pos, size_t n)
+{
+	return this->buffer.substr(pos, n);
+}
+
+bool User::sendBufferEmpty() const
+{
+	return this->send_buffer.empty();
+}
+
+void User::bufferErase(int pos, int n)
+{
+	this->buffer.erase(pos, n);
+}
+
+bool User::bufferEmpty() const
+{
+	return this->buffer.empty();
+}
+
+size_t User::bufferFind(const char * toFind) const
+{
+	return this->buffer.find(toFind);
+}
+	
+std::string User::getBuffer() const
+{
+	return this->buffer;
+}
+const char * User::sendBufferCstr() const
+{
+	return this->send_buffer.c_str();
+}
+
+size_t User::sendBufferSize() const
+{
+	return this->send_buffer.size();
+}
+
 std::string User::getNickName() const
 {
 	return this->nickname;

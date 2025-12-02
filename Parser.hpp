@@ -17,7 +17,7 @@ class Parser {
 		Parser();
 	public:
 		static bool cmd_exist(const std::string& cmd);
-		static Command parse(const std::string& input, const std::vector<User>& usr_vec, const int fd);
+		static Command parse(const std::string& input, std::vector<User>& usr_vec, const int fd);
 };
 
 #endif

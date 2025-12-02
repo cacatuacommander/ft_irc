@@ -20,7 +20,7 @@ std::vector<User>::const_iterator userResearch(int fd, const std::vector<User>& 
 	return usr_vec.end();
 }
 
-Command Parser::parse(const std::string& input, const std::vector<User>& usr_vec, const int fd) {
+Command Parser::parse(const std::string& input, std::vector<User> & usr_vec, const int fd) {
 	Command cmd;
 	cmd.valid = false;
 	cmd.ghost_trail = false;
@@ -35,7 +35,7 @@ Command Parser::parse(const std::string& input, const std::vector<User>& usr_vec
 	 //ho commentato questo perche ora lo facciamo fuori quindi non serve piu credo
 /*	if (tmp.size() < 4 || tmp[tmp.size() - 1] != '\n' || tmp[tmp.size() - 2] != '\r') {
 		std::string err = ":" + std::string(SERVER_NAME) + " 421 " + nick + " :Unknown command babo\r\n";
-		send(fd, err.c_str(), err.size(), 0);
+		safe_send(usr_vec, fd, err);
 		return cmd;
 	}
 	else
@@ -53,7 +53,7 @@ Command Parser::parse(const std::string& input, const std::vector<User>& usr_vec
 	ss >> tmpCmd;
 	if (cmd_exist(tmpCmd) == false) {
 		std::string err = ":" + std::string(SERVER_NAME) + " 421 " + nick + " :Unknown command\r\n";
-		send(fd, err.c_str(), err.size(), 0);
+		safe_send(usr_vec, fd, err);
 		return cmd;
 	}
 	else {
@@ -63,21 +63,21 @@ Command Parser::parse(const std::string& input, const std::vector<User>& usr_vec
 		if (tmpCmd == "NICK") {
 			if (!curr_usr->getPassword()) {
 				std::string msg = ":" + std::string(SERVER_NAME) + " 451 * :You have not registered\r\n";
-				send(fd, msg.c_str(), msg.size(), 0);
+				safe_send(usr_vec, fd, msg);
 				return cmd;
 			}
 		}
 		else if (tmpCmd == "USER") {
 			if (curr_usr->getPassword() == false || curr_usr->getNickName() == "") {
 				std::string msg = ":" + std::string(SERVER_NAME) + " 451 * :You have not registered\r\n";
-				send(fd, msg.c_str(), msg.size(), 0);
+				safe_send(usr_vec, fd, msg);
 				return cmd;
 			}
 		}
 		else {
 			if (curr_usr->getUserName() == "" && tmpCmd != "PING" && tmpCmd != "PONG" && tmpCmd != "QUIT" && tmpCmd != "PASS") {
 				std::string msg = ":" + std::string(SERVER_NAME) + " 451 " + nick + " :You have not registered\r\n";
-				send(fd, msg.c_str(), msg.size(), 0);
+				safe_send(usr_vec, fd, msg);
 				return cmd;
 			}
 		}

@@ -1,15 +1,74 @@
 
 #include "irc.hpp"
 
-//int port = 6667;
-#define PORT 6667
-#define MAX_CLIENTS 10
-
 volatile bool g_running = true;
 
 void handle_sigint(int)
 {
-    g_running = false;
+	g_running = false;
+}
+
+bool isNumber(const char *str)
+{
+	if (!str || !*str)
+	{
+		std::cerr << "Error: port must be a number\n";
+		return false;
+	}
+	int i;
+	for (i = 0; str[i]; ++i)
+	{
+		if (str[i] < '0' || str[i] > '9')
+		{
+			std::cerr << "Error: port must be a number\n";
+			return false;
+		}
+	}
+	if (i > 5)
+	{
+		std::cerr << "Error: port out of range (1-65535)\n";
+		return false;
+	}
+	return true;
+}
+
+bool port_parsing(const char *str, long & port )
+{
+	if (!isNumber(str))
+		return false;
+
+	port = std::strtol(str, NULL, 10);
+
+	if (port < 1 || port > 65535)
+	{
+		std::cerr << "Error: port out of range (1-65535)\n";
+		return false;
+	}
+	return true;
+}
+
+bool isValidPassword(const char *str)
+{
+	if (!str || !*str)
+	{
+		std::cerr << "Invalid Password\n";
+		return false;
+	}
+	int i;
+	for (i = 0; str[i]; ++i)
+	{
+		if (str[i] <= ' ' || str[i] == ':' || str[i] == ',')
+		{
+			std::cerr << "Invalid Password\n";
+			return false;
+		}
+	}
+	if (i > 510)
+	{
+		std::cerr << "Invalid Password\n";
+		return false;
+	}
+	return true;
 }
 
 int main(int argc, char** argv)
@@ -19,23 +78,26 @@ int main(int argc, char** argv)
 	socklen_t addrlen = sizeof(address);
  
 
-    //gestione cntrl-C
-    struct sigaction sa;
-    sa.sa_handler = handle_sigint;
-    sigemptyset(&sa.sa_mask);
-    sa.sa_flags = 0;
-    sigaction(SIGINT, &sa, NULL);
+	//gestione cntrl-C
+	struct sigaction sa;
+	sa.sa_handler = handle_sigint;
+	sigemptyset(&sa.sa_mask);
+	sa.sa_flags = 0;
+	sigaction(SIGINT, &sa, NULL);
 
 
-	if (argc < 2)//da modificare per aggiundere porta
+	if (argc < 3)
 	{
-		std::cerr << "missing argument password needed" << std::endl;
+		std::cerr << "missing argument port and password needed" << std::endl;
 		return 0;
 	}
 
-	std::string password = argv[1];//da modificare per aggiungere porta
-
-	//port = atoi(argv[1]);//da controllare se argv1 e' numero
+	if (!isValidPassword(argv[2]))
+		return 1;
+	std::string password = argv[2];//da modificare per aggiungere porta
+	long port;
+	if (!port_parsing(argv[1], port))
+		return 1;
 
 	server_fd = socket(AF_INET, SOCK_STREAM, 0);
 	if (server_fd < 0)
@@ -50,7 +112,7 @@ int main(int argc, char** argv)
 	std::memset(&address, 0, sizeof(address));
 	address.sin_family = AF_INET;
 	address.sin_addr.s_addr = INADDR_ANY;
-	address.sin_port = htons(PORT);//da modificare per aggiungere porta
+	address.sin_port = htons(static_cast<uint16_t>(port));//da modificare per aggiungere porta
 
 	if (bind(server_fd, (struct sockaddr*)&address, sizeof(address)) < 0)
 	{
@@ -64,7 +126,7 @@ int main(int argc, char** argv)
 		return 1;
 	}
 
-	std::cout << "Server listening on port " << PORT << "...\n";
+	std::cout << "Server listening on port " << port << "...\n";
 
 	std::vector<pollfd> fds;
 	fds.push_back((pollfd){ server_fd, POLLIN, 0 });
@@ -76,12 +138,16 @@ int main(int argc, char** argv)
 
 	while (g_running)
 	{
-		for (size_t i = 0; i < fds.size(); ++i)
+/* 		for (size_t i = 0; i < fds.size(); ++i)
 		{
-			fds[i].events = POLLIN;
-			if (i != 0 && !uservect[searchVectWithFd(uservect, fds[i].fd)].send_buffer.empty())//migliorabile mettendo pollfd anche in User
-				fds[i].events |= POLLOUT;
-		}
+			if (fds[i].fd != server_fd)
+			{
+				fds[i].events = POLLIN;
+				size_t ind = searchVectWithFd(uservect, fds[i].fd);
+				if (ind < uservect.size() && !uservect[ind].sendBufferEmpty())//migliorabile mettendo pollfd anche in User
+					fds[i].events |= POLLOUT;
+			}
+		} */
 
 		int poll_count = poll(&fds[0], fds.size(), -1);
 		if (poll_count < 0)
@@ -97,15 +163,15 @@ int main(int argc, char** argv)
 				if (ind != uservect.size())
 				{
 					uservect.erase(uservect.begin() + ind);
-					//levare utente anche da tutti i gruppi
-					deleteFromGroups(channelvect, fds[i].fd);
+					std::string msg = ":" + uservect[ind].getNickName() + uservect[ind].getUserName() + "@" + uservect[ind].getIp() + " QUIT : Client exited\r\n";
+					deleteFromGroups(channelvect, fds[i].fd, uservect, msg);
 				}
 				close(fds[i].fd);
 				std::cout << "Client disconnected (fd=" << fds[i].fd << ")\n";
 				fds.erase(fds.begin() + i);
 				--i;
 			}
-			if (fds[i].revents & POLLIN)
+			else if (fds[i].revents & POLLIN)
 			{
 				// a) Server socket → new connection
 				if (fds[i].fd == server_fd)
@@ -127,12 +193,22 @@ int main(int argc, char** argv)
 					if (bytes <= 0)//differenziare < 0 e == 0
 					{
 						//cancello utente da vettore utenti(da testare)
-						int ind = searchVectWithFd(uservect, fds[i].fd);
-						uservect.erase(uservect.begin() + ind);
-						//levare utente anche da tutti i gruppi
-						deleteFromGroups(channelvect, fds[i].fd);
+						size_t ind = searchVectWithFd(uservect, fds[i].fd);
+						if (ind != uservect.size())
+						{
+							uservect.erase(uservect.begin() + ind);
+							std::string msg;
+							if (bytes == 0) 
+		  						msg = ":" + uservect[ind].getNickName() + "!" + uservect[ind].getUserName() + "@" + uservect[ind].getIp() + " QUIT :Client exited\r\n";
+							else
+								msg = ":" + uservect[ind].getNickName() + "!" + uservect[ind].getUserName() + "@" + uservect[ind].getIp() + " QUIT :Connection lost\r\n";
+							deleteFromGroups(channelvect, fds[i].fd, uservect, msg);
+						}
 						close(fds[i].fd);
-						std::cout << "Client disconnected (fd=" << fds[i].fd << ")\n";
+						if (bytes == 0)
+							std::cout << "Client disconnected (fd=" << fds[i].fd << ")\n";
+						else
+							std::cout << "Client unexpectedly disconnected (fd=" << fds[i].fd << ")\n";
 						fds.erase(fds.begin() + i);
 						--i;
 					}
@@ -144,14 +220,13 @@ int main(int argc, char** argv)
 
 						int index = searchVectWithFd(uservect, fds[i].fd);
 
-						uservect[index].buffer.append(buffer, bytes);
+						uservect[index].bufferAppend(buffer, bytes);
 						size_t pos;
-						//std::cout << "stringa di input : " << uservect[index].buffer << std::endl;
-						while ((pos = uservect[index].buffer.find("\r\n")) != std::string::npos)
+						std::cout << "stringa di input : " << uservect[index].getBuffer() << std::endl;
+						while ((pos = uservect[index].bufferFind("\r\n")) != std::string::npos)
 						{
-
-							std::string line = uservect[index].buffer.substr(0, pos);
-							uservect[index].buffer.erase(0, pos + 2);
+							std::string line = uservect[index].bufferSubstr(0, pos);
+							uservect[index].bufferErase(0, pos + 2);
 
 							//std::cout << "\nline: " << line << std::endl;
 							Command cmd = Parser::parse(line, uservect, fds[i].fd);
@@ -166,10 +241,10 @@ int main(int argc, char** argv)
 								std::cout << " trailing: " << cmd.trailing << " valid: " << cmd.valid << std::endl; */
 								
 								
-							/* 	std::cerr << "\nfd: " << uservect[index].getFd() <<  std::endl;
+								std::cerr << "\nfd: " << uservect[index].getFd() <<  std::endl;
 								std::cerr << "nick: " << uservect[index].getNickName() <<  std::endl;
 								std::cerr << "user: " << uservect[index].getUserName() <<  std::endl;
-								std::cerr << "password: " << uservect[index].getPassword() <<  std::endl;  */
+								std::cerr << "password: " << uservect[index].getPassword() <<  std::endl; 
 
 /* 								Command cmd;
 								cmd.name = line;
@@ -185,14 +260,15 @@ int main(int argc, char** argv)
 								exec_command(cmd, uservect, channelvect, password, fds ,i);
 							}
 						}
-						if (fds[i].revents & POLLOUT)
-						{
-							trySendBuffer(uservect, channelvect, fds, i);
-						}
 						//std::string reply = "Server received: " + std::string(buffer);
-						//send(fds[i].fd, reply.c_str(), reply.size(), 0);
+						//safe_send(uservect, fds[i].fd, reply);
 					}
 				}
+			}
+			else if (fds[i].revents & POLLOUT && !uservect[i].sendBufferEmpty())
+			{
+				std::cout << "quaaa " << std::endl;
+				trySendBuffer(uservect, channelvect, fds, i);
 			}
 		}
 	}

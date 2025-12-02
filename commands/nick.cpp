@@ -6,7 +6,7 @@ bool isValidNickname(std::string newnickname, int fd, std::string & oldnick, std
 	if (newnickname == "" || newnickname.length() < 1)
 	{
 		std::string reply = std::string(SERVER_NAME) + std::string(" 432 ") + oldnick +  " " + newnickname + " :Erroneous nickname\r\n";
-		send(fd, reply.c_str(), reply.size(), 0);
+		safe_send(uservect, fd, reply);
 		return false;
 	}
 	if (newnickname.length() > 30 || !((newnickname[0] >= 'A' && newnickname[0] <= 'Z') || (newnickname[0] >= 'a' &&  newnickname[0] <= 'z') || \
@@ -14,7 +14,7 @@ bool isValidNickname(std::string newnickname, int fd, std::string & oldnick, std
 			newnickname[0] == '^' || newnickname[0] == '_'))
 	{
 		std::string reply = std::string(SERVER_NAME) + std::string(" 432 ") + oldnick + " " + newnickname + " :Erroneous nickname\r\n";
-		send(fd, reply.c_str(), reply.size(), 0);
+		safe_send(uservect, fd, reply);
 		return false;
 	}	
 	size_t i = 1;
@@ -25,7 +25,7 @@ bool isValidNickname(std::string newnickname, int fd, std::string & oldnick, std
 			newnickname[i] == '^' || newnickname[i] == '_' || newnickname[i] == '-' ))
 		{
 			std::string reply = std::string(SERVER_NAME) + std::string(" 432 ") + oldnick + " " + newnickname + " :Erroneous nickname\r\n";
-			send(fd, reply.c_str(), reply.size(), 0);
+			safe_send(uservect, fd, reply);
 			return false;
 		}
 		i++;
@@ -34,7 +34,7 @@ bool isValidNickname(std::string newnickname, int fd, std::string & oldnick, std
 	{
 		//forse da levare ma ci sta
 		std::string reply = std::string(SERVER_NAME) + std::string(" 437 ") + oldnick + " " + newnickname + " :Nickname/channel is temporarily unavailable\r\n";
-		send(fd, reply.c_str(), reply.size(), 0);
+		safe_send(uservect, fd, reply);
 		return false;
 	}
 	return true;
@@ -46,13 +46,13 @@ bool nicknameAlredyInUse(std::string newnickname, int fd, std::vector<User> & us
 	if (i < uservect.size())
 	{
 		std::string reply = std::string(SERVER_NAME) + std::string(" 433 ") + oldnick + " " + newnickname + " :Nickname is already in use\r\n";
-		send(fd, reply.c_str(), reply.size(), 0);
+		safe_send(uservect, fd, reply);
 		return true;
 	}
 	return false;
 }
 
-void execNick(Command cmd, int fd, std::vector<User> & uservect)
+void execNick(Command cmd, int fd, std::vector<User> & uservect, std::vector<Channel> & channelvect)
 {
 	size_t i = searchVectWithFd(uservect, fd);
 
@@ -66,7 +66,7 @@ void execNick(Command cmd, int fd, std::vector<User> & uservect)
 		{
 			//:<server> 431 <nick> :No nickname given
 			std::string reply = std::string(SERVER_NAME) + std::string(" 431 ") + oldnick + " :No nickname given\r\n";
-			send(fd, reply.c_str(), reply.size(), 0);
+			safe_send(uservect, fd, reply);
 			return ;
 		}
 		std::string newnickname;
@@ -75,12 +75,20 @@ void execNick(Command cmd, int fd, std::vector<User> & uservect)
 		else
 			newnickname = cmd.trailing;
 
-		if (!isValidNickname(newnickname, fd, oldnick,uservect))
+		if (!isValidNickname(newnickname, fd, oldnick, uservect))
 			return ;
 		if (nicknameAlredyInUse(newnickname, fd, uservect, oldnick))
 			return ;
+
+		std::string msg = ":" + uservect[i].getNickName() + uservect[i].getUserName() + "@" + uservect[i].getIp() + " NICK :" + newnickname + "\r\n";
+		for (size_t n = 0; n < channelvect.size(); ++n)
+		{
+			if (channelvect[n].userIsInChannel(fd))
+			{
+				channelvect[n].sendToAll(uservect, msg, fd);
+			}
+		}
 		uservect[i].setNickName(newnickname);
-		//std::cout << "nick aggiornato a:" << newnickname << std::endl;
 	}
 	else
 	{

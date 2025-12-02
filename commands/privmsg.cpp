@@ -9,7 +9,7 @@ bool checkCmdParams(const std::string &nick, int fd, std::vector<User> &uservect
         if (ir == uservect.size())
         {
             std::string msg = ":" + std::string(SERVER_NAME) + " 401 " + nick + " " + t + " :No such nick\r\n";
-            send(fd, msg.c_str(), msg.size(), 0);
+            safe_send(uservect, fd, msg);
             return false;
         }
     }
@@ -18,13 +18,13 @@ bool checkCmdParams(const std::string &nick, int fd, std::vector<User> &uservect
         if (ir == channelVect.size())
         {
             std::string msg = ":" + std::string(SERVER_NAME) + " 403 " + nick + " " + t + " :No such channel\r\n";
-            send(fd, msg.c_str(), msg.size(), 0);
+            safe_send(uservect, fd, msg);
             return false;
         }
         if (!channelVect[ir].userIsInChannel(fd))
         {
             std::string msg = ":" + std::string(SERVER_NAME) + " 404 " + nick + " " + t + " :Cannot send to channel\r\n";
-            send(fd, msg.c_str(), msg.size(), 0);
+            safe_send(uservect, fd, msg);
             return false;
         }
     }
@@ -35,13 +35,13 @@ bool checkParamsPrvMsg(const Command &cmd, std::vector<std::string> multiParam, 
     if (cmd.params.size() < 1)
     {
         std::string msg = ":" + std::string(SERVER_NAME) + " 411 " + nick + " :No recipient given (PRIVMSG)\r\n";
-        send(fd, msg.c_str(), msg.size(), 0);
+        safe_send(uservect, fd, msg);
         return false;
     }
     if (cmd.trailing.empty())
     {
         std::string msg = ":" + std::string(SERVER_NAME) + " 412 " + nick + " :No text to send\r\n";
-        send(fd, msg.c_str(), msg.size(), 0);
+        safe_send(uservect, fd, msg);
         return false;
     }
     for (size_t i = 0; i < multiParam.size(); i++)
@@ -87,7 +87,7 @@ void execPrivMsg(Command cmd, int fd, std::vector<Channel>& channelVect, std::ve
         {
             size_t ir = searchChannel(channelVect, target);
             if (ir != channelVect.size()) {
-                channelVect[ir].sendToAll(msg, fd);
+                channelVect[ir].sendToAll(uservect, msg, fd);
             }
         }
     }
