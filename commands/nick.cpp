@@ -80,7 +80,7 @@ void execNick(Command cmd, int fd, std::vector<User> & uservect, std::vector<Cha
 		if (nicknameAlredyInUse(newnickname, fd, uservect, oldnick))
 			return ;
 
-		std::string msg = ":" + uservect[i].getNickName() + uservect[i].getUserName() + "@" + uservect[i].getIp() + " NICK :" + newnickname + "\r\n";
+		std::string msg = ":" + uservect[i].getNickName() + " NICK :" + newnickname + "\r\n";
 		for (size_t n = 0; n < channelvect.size(); ++n)
 		{
 			if (channelvect[n].userIsInChannel(fd))

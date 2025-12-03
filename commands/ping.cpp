@@ -8,7 +8,7 @@ void execPing(Command cmd, int fd, std::vector<User> & uservect)
 	if (nickname == "")
 		nickname = "*";
 
-	if (argumentsArePresent_mod(cmd, 1, nickname))
+	if (!argumentsArePresent_mod(cmd, 1, nickname))
 	{
 		//:server 409 <nick> :No origin specified
 		std::string reply = ":" + std::string(SERVER_NAME) + std::string(" 409 ") + nickname + " " + cmd.name + " :No origin specified\r\n";
@@ -16,13 +16,7 @@ void execPing(Command cmd, int fd, std::vector<User> & uservect)
 		return ;
 	}
 
-	std::string message;
-	if (!cmd.params.empty())
-		message = cmd.params[0];
-	else
-		message = cmd.trailing;
-
-	if(message == "" || message.size() < 2 || message[0] != ':')
+	if(!cmd.params.empty())
 	{
 		//:server 409 <nick> :No origin specified
 		std::string reply = ":" + std::string(SERVER_NAME) + std::string(" 409 ") + nickname + " " + cmd.name + " :No origin specified\r\n";
@@ -30,6 +24,6 @@ void execPing(Command cmd, int fd, std::vector<User> & uservect)
 		return ;
 	}
 	
-	std::string reply = "PONG " ":" + message + "\r\n";
+	std::string reply = "PONG :" + cmd.trailing + "\r\n";
 	safe_send(uservect, fd, reply);
 }
