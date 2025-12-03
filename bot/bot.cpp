@@ -76,7 +76,7 @@ void elabBuffer(std::string buffer, int sock_fd)
     }
 }
 
-int main() {
+int main(int argc, char **argv) {
     int sock_fd;
     struct sockaddr_in server_addr;
     char buffer[512];

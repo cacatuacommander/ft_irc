@@ -102,7 +102,7 @@ void trySendBuffer(std::vector<User> & uservect, std::vector<Channel> & channelv
 		{
 			if (i < uservect.size() && static_cast<size_t>(n) < uservect[i].sendBufferSize())
 			{
-				std::cerr << " sei quiii111" << std::endl;
+				//std::cerr << " sei quiii111" << std::endl;
 				uservect[i].sendBufferErase(0, n);  // remove bytes that were sent
 			}
 		}
@@ -113,20 +113,20 @@ void trySendBuffer(std::vector<User> & uservect, std::vector<Channel> & channelv
 		else
 		{
 			std::cerr << " sei quaa " << std::endl;
-			(void) channelvect;
-			(void) fds;
-		/* 	size_t ind = searchVectWithFd(uservect, fds[i].fd);
+			/* (void) channelvect;
+			(void) fds; */
+			size_t ind = searchVectWithFd(uservect, fds[i].fd);
 			if (ind != uservect.size())
 			{
 				uservect.erase(uservect.begin() + ind);
-				std::string msg = ":" + uservect[ind].getNickName() + uservect[ind].getUserName() + "@" + uservect[ind].getIp() + " QUIT : Client exited\r\n";
+				std::string msg = ":" + uservect[ind].getNickName() + " QUIT : Client exited\r\n";
 				deleteFromGroups(channelvect, fds[i].fd, uservect, msg);
 			}
 			close(fds[i].fd);
 			std::cout << "Client disconnected (fd=" << fds[i].fd << ")\n";
 			fds.erase(fds.begin() + i);
-			--i;*/
-			break;
+			--i;
+			//break;
 		} 
 	}
 }

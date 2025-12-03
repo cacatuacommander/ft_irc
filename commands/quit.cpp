@@ -13,7 +13,7 @@ void execQuit(Command cmd, int fd, std::vector<User>& uservect, std::vector<Chan
 	else
 		quittingMessage = "Client exited";
 
-	std::string msg = ":" + uservect[ind].getNickName() + uservect[ind].getUserName() + "@" + uservect[ind].getIp() + " QUIT :" + quittingMessage + "\r\n";
+	std::string msg = ":" + uservect[ind].getNickName() + " QUIT :" + quittingMessage + "\r\n";
 	size_t sizee = channelVect.size();
 	for (size_t n = 0; n < sizee; ++n)
 	{
