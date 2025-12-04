@@ -23,7 +23,7 @@ void execQuit(Command cmd, int fd, std::vector<User>& uservect, std::vector<Chan
 			channelVect[n].removeFromUsers(fd);
 			channelVect[n].removeFromOperators(fd);
 			channelVect[n].removeFromInvites(fd);
-			if (channelVect[n].getUsersSize() == 0 || (channelVect[n].getUsersSize() == 1 && channelVect[n].getListOfNicks(uservect) == "@bot"))
+			if (channelVect[n].getUsersSize() == 0 || (channelVect[n].getUsersSize() == 1 && (channelVect[n].getListOfNicks(uservect) == "@bot" || channelVect[n].getListOfNicks(uservect) == "bot")))
 			{
 				channelVect.erase(channelVect.begin() + n);
 				--n;

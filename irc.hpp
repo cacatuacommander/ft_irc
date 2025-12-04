@@ -1,6 +1,5 @@
 
-#include <vector>
-#include <string>
+
 #include <sstream>
 
 #include <iostream>
@@ -17,7 +16,7 @@
 
 #define SERVER_NAME "our.server.irc"
 
-#define SERVER_CREATION_DATE "Wed Dec 3 2024"
+#define SERVER_CREATION_DATE "Mon Dec 4 2025"
 
 #define MAX_CLIENTS 10
 

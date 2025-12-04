@@ -65,7 +65,7 @@ void execNick(Command cmd, int fd, std::vector<User> & uservect, std::vector<Cha
 		if (!argumentsArePresent_mod(cmd, 1, oldnick))
 		{
 			//:<server> 431 <nick> :No nickname given
-			std::string reply = std::string(SERVER_NAME) + std::string(" 431 ") + oldnick + " :No nickname given\r\n";
+			std::string reply = ":" +std::string(SERVER_NAME) + std::string(" 431 ") + oldnick + " :No nickname given\r\n";
 			safe_send(uservect, fd, reply);
 			return ;
 		}

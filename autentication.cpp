@@ -30,7 +30,6 @@ bool argumentsArePresent_mod(Command cmd, unsigned int numbofargneeded, std::str
 		argsn++;
 	if (argsn >= numbofargneeded)
 		return true;
-
 	return false;
 }
 

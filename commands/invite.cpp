@@ -32,7 +32,7 @@ bool checkParamsInvite(const Command &cmd, const std::string &nick, int fd, std:
 
 	if (!channel.searchFDinOperators(fd))
 	{
-		std::string msg = ":" + std::string(SERVER_NAME) + " 482 " + nick +
+		std::string msg = ":" + std::string(SERVER_NAME) + " 482 " + nick + 
 						  " " + channelName + " :You're not channel operator\r\n";
 		safe_send(uservect, fd, msg);
 		return false;
@@ -41,7 +41,8 @@ bool checkParamsInvite(const Command &cmd, const std::string &nick, int fd, std:
 	size_t targetIdx = searchVectWithNick(uservect, targetNick);
 	if (targetIdx == uservect.size())
 	{
-		std::string msg = ":" + std::string(SERVER_NAME) + " 401 " + nick +
+		std::string msg = ":" + std::string(SERVER_NAME) + " 401 " + nick + 
+						  " " + channelName + 
 						  " " + targetNick + " :No such nick\r\n";
 		safe_send(uservect, fd, msg);
 		return false;
@@ -50,14 +51,15 @@ bool checkParamsInvite(const Command &cmd, const std::string &nick, int fd, std:
 	if (channel.userIsInChannel(uservect[targetIdx].getFd()))
 	{
 		std::string msg = ":" + std::string(SERVER_NAME) + " 443 " + nick +
-						  " " + targetNick + " " + channelName + " :is already on channel\r\n";
+						  " " + channelName + " " + targetNick + " :is already on channel\r\n";
 		safe_send(uservect, fd, msg);
 		return false;
 	}
 	return true;
 }
 
-void execInvite(Command cmd, int fd, std::vector<Channel>& channelVect, std::vector<User> & uservect) {
+void execInvite(Command cmd, int fd, std::vector<Channel>& channelVect, std::vector<User> & uservect)
+{
 	size_t sender_index = searchVectWithFd(uservect, fd);
 	std::string nick = uservect[sender_index].getNickName().empty() ? "*" : uservect[sender_index].getNickName();
 	if (!checkParamsInvite(cmd, nick, fd, uservect, channelVect))
@@ -68,7 +70,8 @@ void execInvite(Command cmd, int fd, std::vector<Channel>& channelVect, std::vec
 	User &sender = uservect[sender_index];
 	User &target = uservect[target_index];
 
-	channel.addUserToInviteList(target.getFd());
+	if (!channel.userIsInvited(target.getFd()))
+		channel.addUserToInviteList(target.getFd());
 	std::string msg = ":" + std::string(SERVER_NAME) + " 341 " +
 				sender.getNickName() + " " +
 				target.getNickName() + " " +
@@ -78,5 +81,5 @@ void execInvite(Command cmd, int fd, std::vector<Channel>& channelVect, std::vec
 	msg = ":" + sender.getNickName() + " INVITE " +
 			target.getNickName() + " " +
 			channel.getName() + "\r\n";
-	safe_send(uservect, fd, msg);
+	safe_send(uservect, target.getFd(), msg);
 }
