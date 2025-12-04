@@ -163,7 +163,7 @@ int main(int argc, char** argv)
 				if (ind != uservect.size())
 				{
 					uservect.erase(uservect.begin() + ind);
-					std::string msg = ":" + uservect[ind].getNickName() + uservect[ind].getUserName() + "@" + uservect[ind].getIp() + " QUIT : Client exited\r\n";
+					std::string msg = ":" + uservect[ind].getNickName() + " QUIT : Client exited\r\n";
 					deleteFromGroups(channelvect, fds[i].fd, uservect, msg);
 				}
 				close(fds[i].fd);
@@ -199,9 +199,9 @@ int main(int argc, char** argv)
 							uservect.erase(uservect.begin() + ind);
 							std::string msg;
 							if (bytes == 0) 
-		  						msg = ":" + uservect[ind].getNickName() + "!" + uservect[ind].getUserName() + "@" + uservect[ind].getIp() + " QUIT :Client exited\r\n";
+		  						msg = ":" + uservect[ind].getNickName() + " QUIT :Client exited\r\n";
 							else
-								msg = ":" + uservect[ind].getNickName() + "!" + uservect[ind].getUserName() + "@" + uservect[ind].getIp() + " QUIT :Connection lost\r\n";
+								msg = ":" + uservect[ind].getNickName() + " QUIT :Connection lost\r\n";
 							deleteFromGroups(channelvect, fds[i].fd, uservect, msg);
 						}
 						close(fds[i].fd);
@@ -228,7 +228,7 @@ int main(int argc, char** argv)
 							std::string line = uservect[index].bufferSubstr(0, pos);
 							uservect[index].bufferErase(0, pos + 2);
 
-							std::cout << "\nline: " << line << std::endl;
+							//std::cout << "\nline: " << line << std::endl;
 							Command cmd = Parser::parse(line, uservect, fds[i].fd);
 							if ( cmd.valid == true)
 							{

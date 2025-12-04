@@ -1,6 +1,5 @@
 
-#include <vector>
-#include <string>
+
 #include <sstream>
 
 #include <iostream>
@@ -17,7 +16,7 @@
 
 #define SERVER_NAME "our.server.irc"
 
-#define SERVER_CREATION_DATE "Wed Dec 3 2024"
+#define SERVER_CREATION_DATE "Mon Dec 4 2025"
 
 #define MAX_CLIENTS 10
 
@@ -45,6 +44,7 @@ void execMode(Command & cmd, int fd, std::vector<User> & uservect, std::vector<C
 void execPart(Command &cmd, int fd, std::vector<User> & uservect, std::vector<Channel> & channelvect);
 void execQuit(Command cmd, int fd, std::vector<User>& uservect, std::vector<Channel>& channelVect, std::vector<pollfd> &fds, int & i);
 void execPing(Command cmd, int fd, std::vector<User> & uservect);
+void execBotCall(Command cmd, int fd, std::vector<Channel>& channelVect, std::vector<User> & uservect);
 
 void deleteFromGroups(std::vector<Channel> & channelvect, int fd, std::vector<User>& uservect, std::string msg);
 void safe_send(std::vector<User> & uservect, int fd, std::string & toAdd);

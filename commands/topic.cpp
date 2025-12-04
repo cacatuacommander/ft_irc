@@ -64,6 +64,7 @@ void execTopic(Command cmd, int fd, std::vector<Channel>& channelVect, std::vect
             msg = ":" + std::string(SERVER_NAME) + " 331 " + sender.getNickName() + " " + channel.getName() + " :" + channel.getTopic() + "\r\n";
         else
             msg = ":" + std::string(SERVER_NAME) + " 332 " + sender.getNickName() + " " + channel.getName() + " :" + channel.getTopic() + "\r\n";
+        channel.sendToAll(uservect, msg, fd);
         safe_send(uservect, fd, msg);
     }
     else
@@ -71,5 +72,6 @@ void execTopic(Command cmd, int fd, std::vector<Channel>& channelVect, std::vect
         channel.changeTopic(cmd.trailing);
         msg = ":" + sender.getNickName() + " TOPIC " + channel.getName() + " :" + channel.getTopic() + "\r\n";
         channel.sendToAll(uservect, msg, fd);
+        safe_send(uservect, fd, msg);
     }
 }

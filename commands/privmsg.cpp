@@ -32,12 +32,7 @@ bool checkCmdParams(const std::string &nick, int fd, std::vector<User> &uservect
 }
 
 bool checkParamsPrvMsg(const Command &cmd, std::vector<std::string> multiParam, const std::string &nick, int fd, std::vector<User> &uservect, std::vector<Channel> &channelVect) {
-    if (cmd.params.size() < 1)
-    {
-        std::string msg = ":" + std::string(SERVER_NAME) + " 411 " + nick + " :No recipient given (PRIVMSG)\r\n";
-        safe_send(uservect, fd, msg);
-        return false;
-    }
+
     if (cmd.trailing.empty())
     {
         std::string msg = ":" + std::string(SERVER_NAME) + " 412 " + nick + " :No text to send\r\n";
@@ -55,8 +50,15 @@ bool checkParamsPrvMsg(const Command &cmd, std::vector<std::string> multiParam, 
 void execPrivMsg(Command cmd, int fd, std::vector<Channel>& channelVect, std::vector<User> & uservect) {
     int is = searchVectWithFd(uservect, fd);
     std::string nick = uservect[is].getNickName().empty() ? "*" : uservect[is].getNickName();
-
+    std::string username = uservect[is].getUserName().empty() ? "*" : uservect[is].getUserName();
     std::vector<std::string> multiParam;
+
+    if (cmd.params.size() < 1)
+    {
+        std::string msg = ":" + std::string(SERVER_NAME) + " 411 " + nick + " :No recipient given (PRIVMSG)\r\n";
+        safe_send(uservect, fd, msg);
+        return ;
+    }
     if (cmd.params[0].find(',') != std::string::npos)
     {
         std::string target = cmd.params[0];
@@ -75,7 +77,7 @@ void execPrivMsg(Command cmd, int fd, std::vector<Channel>& channelVect, std::ve
     for (size_t i = 0; i < multiParam.size(); i++)
     {
         std::string target = multiParam[i];
-        std::string msg = ":" + nick + " PRIVMSG " + target + " :" + cmd.trailing + "\r\n";
+        std::string msg = ":" + nick + "!~" + username + "@" + "127.0.0.1 " +  "PRIVMSG " + target + " :" + cmd.trailing + "\r\n";
         if (target[0] != '#')
         {
             size_t ir = searchVectWithNick(uservect, target);

@@ -1,7 +1,7 @@
 
 #include "../irc.hpp"
 
-bool isValidNickname(std::vector<User> & uservect, std::string newnickname, int fd, std::string & oldnick)
+bool isValidNickname(std::string newnickname, int fd, std::string & oldnick, std::vector<User> & uservect)
 {
 	if (newnickname == "" || newnickname.length() < 1)
 	{
@@ -30,7 +30,7 @@ bool isValidNickname(std::vector<User> & uservect, std::string newnickname, int 
 		}
 		i++;
 	}
-	if (newnickname == "admin" || newnickname == "root")
+	if (newnickname == "admin" || newnickname == "root" || (newnickname == "bot" && uservect.size() > 1))
 	{
 		//forse da levare ma ci sta
 		std::string reply = std::string(SERVER_NAME) + std::string(" 437 ") + oldnick + " " + newnickname + " :Nickname/channel is temporarily unavailable\r\n";
@@ -65,7 +65,7 @@ void execNick(Command cmd, int fd, std::vector<User> & uservect, std::vector<Cha
 		if (!argumentsArePresent_mod(cmd, 1, oldnick))
 		{
 			//:<server> 431 <nick> :No nickname given
-			std::string reply = std::string(SERVER_NAME) + std::string(" 431 ") + oldnick + " :No nickname given\r\n";
+			std::string reply = ":" +std::string(SERVER_NAME) + std::string(" 431 ") + oldnick + " :No nickname given\r\n";
 			safe_send(uservect, fd, reply);
 			return ;
 		}
@@ -75,12 +75,12 @@ void execNick(Command cmd, int fd, std::vector<User> & uservect, std::vector<Cha
 		else
 			newnickname = cmd.trailing;
 
-		if (!isValidNickname(uservect, newnickname, fd, oldnick))
+		if (!isValidNickname(newnickname, fd, oldnick, uservect))
 			return ;
 		if (nicknameAlredyInUse(newnickname, fd, uservect, oldnick))
 			return ;
 
-		std::string msg = ":" + uservect[i].getNickName() + uservect[i].getUserName() + "@" + uservect[i].getIp() + " NICK :" + newnickname + "\r\n";
+		std::string msg = ":" + uservect[i].getNickName() + " NICK :" + newnickname + "\r\n";
 		for (size_t n = 0; n < channelvect.size(); ++n)
 		{
 			if (channelvect[n].userIsInChannel(fd))

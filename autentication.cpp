@@ -30,7 +30,6 @@ bool argumentsArePresent_mod(Command cmd, unsigned int numbofargneeded, std::str
 		argsn++;
 	if (argsn >= numbofargneeded)
 		return true;
-
 	return false;
 }
 
@@ -60,4 +59,6 @@ void exec_command(Command cmd, std::vector<User> & uservect, std::vector<Channel
 		execQuit(cmd, fds[i].fd, uservect, channelvect, fds, i);
 	if (cmd.name == "PING")
 		execPing(cmd, fds[i].fd, uservect);
+	if (cmd.name == "BOT")
+		execBotCall(cmd, fds[i].fd, channelvect, uservect);
 }
