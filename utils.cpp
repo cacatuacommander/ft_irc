@@ -10,10 +10,6 @@ size_t searchVectWithFd(std::vector<User> & uservect, int fd)//da farla che rito
 	{
 		if (it->getFd() == fd)
 		{
-			/* std::cerr << "fd: " << it->getFd() <<  std::endl;
-			std::cerr << "nick: " << it->getNickName() <<  std::endl;
-			std::cerr << "user: " << it->getUserName() <<  std::endl;
-			std::cerr << "password: " << it->getPassword() <<  std::endl; */
 			return i;
 		}
 		i++;
@@ -29,10 +25,6 @@ size_t searchVectWithNick(std::vector<User> & uservect, std::string & nickname)/
 	{
 		if (it->getNickName() == nickname)
 		{
-			/* std::cerr << "fd: " << it->getFd() <<  std::endl;
-			std::cerr << "nick: " << it->getNickName() <<  std::endl;
-			std::cerr << "user: " << it->getUserName() <<  std::endl;
-			std::cerr << "password: " << it->getPassword() <<  std::endl; */
 			return i;
 		}
 		i++;
@@ -48,10 +40,6 @@ size_t searchChannel(std::vector<Channel> & channelvect, std::string & channelna
 	{
 		if (it->getName() == channelname)
 		{
-			/* std::cerr << "fd: " << it->getFd() <<  std::endl;
-			std::cerr << "nick: " << it->getNickName() <<  std::endl;
-			std::cerr << "user: " << it->getUserName() <<  std::endl;
-			std::cerr << "password: " << it->getPassword() <<  std::endl; */
 			return i;
 		}
 		i++;
