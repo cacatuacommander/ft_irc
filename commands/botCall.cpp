@@ -25,7 +25,8 @@ bool checkParamsBotCall(const Command &cmd, const std::string &nick, int fd, std
     size_t bot_idx = searchVectWithNick(uservect, bot_nick);
     if (channel.userIsInChannel(uservect[bot_idx].getFd()))
     {
-        std::string msg = "The Shaman is already in the channel, STOP invoking him!\r\n";
+        std::string msg = ":" + std::string(SERVER_NAME) + " 442 " + nick +
+                          " " + channelName + " The Shaman is already in the channel, STOP invoking him!\r\n";
         send(fd, msg.c_str(), msg.size(), 0);
         return false;
     }
@@ -57,7 +58,8 @@ void execBotCall(Command cmd, int fd, std::vector<Channel>& channelVect, std::ve
 
     size_t channel_index = searchChannel(channelVect, cmd.params[0]);
     Channel &channel = channelVect[channel_index];
-    std::string msg = "The shaman was invoked... Let's wait for that old geezer\r\n";
+    std::string msg = ":" + std::string(SERVER_NAME) + " 442 " + nick +
+                      " " + cmd.params[0] + " The shaman was invoked... Let's wait for that old geezer\r\n";
 
     channel.sendToAll(uservect, msg, fd);
     send(fd, msg.c_str(), msg.size(), 0);
@@ -69,5 +71,6 @@ void execBotCall(Command cmd, int fd, std::vector<Channel>& channelVect, std::ve
     if (bot_idx < uservect.size())
         send(uservect[bot_idx].getFd(), bot_msg.c_str(), bot_msg.size(), 0);
     else
-        msg = "The shaman is not collaborating\r\n";
+        msg = ":" + std::string(SERVER_NAME) + " 442 " + nick +
+               " " + cmd.params[0] + " The shaman is not collaborating\r\n";
 }

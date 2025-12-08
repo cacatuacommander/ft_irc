@@ -43,10 +43,10 @@ bool usernameAlredySet(int i, std::vector<User> & uservect, int fd)
 void send_welcome_messages(int i, std::vector<User> & uservect, int fd)
 {
 	std::string nick = uservect[i].getNickName();//:server 001 <nick> :Welcome to the IRC Network, <nick>!<user>@<host>
-	std::string message = std::string(SERVER_NAME) + std::string(" 001 ") + nick + " :Welcome to the IRC Network, " + nick + "!" + uservect[i].getUserName() + "@" + uservect[i].getIp() + "\r\n";
+	std::string message = ":" + std::string(SERVER_NAME) + std::string(" 001 ") + nick + " :Welcome to the IRC Network, " + nick + "!" + uservect[i].getUserName() + "@" + uservect[i].getIp() + "\r\n";
 	safe_send(uservect, fd, message);//:server 002 <nick> :Your host is <servername>, running version <version>
 	
-	message = ":" + std::string(SERVER_NAME) + std::string(" 002 ") + nick + " :Your host is " + "our.server.irc" + ", running version "+ std::string(SERVER_VERSION) + "\r\n";
+	message = ":" + std::string(SERVER_NAME) + std::string(" 002 ") + nick + " :Your host is " + std::string(SERVER_NAME) + ", running version " + std::string(SERVER_VERSION) + "\r\n";
 	safe_send(uservect, fd, message);
 	
 	message = ":" + std::string(SERVER_NAME) + std::string(" 003 ") + nick + " :This server was created " + std::string(SERVER_CREATION_DATE) + "\r\n";
@@ -55,38 +55,38 @@ void send_welcome_messages(int i, std::vector<User> & uservect, int fd)
 	message = ":" + std::string(SERVER_NAME) + std::string(" 004 ") + nick + " :This server was created " + std::string(SERVER_NAME) + " " + std::string(SERVER_VERSION) + " iwso itkol" +"\r\n";
 	safe_send(uservect, fd, message);//:server 005 <nick> <parameter1> <parameter2> ... :<optional comment>
 	
-	message = ":" + std::string(SERVER_NAME) + std::string(" 005 ") + nick + " :CHANTYPES=# PREFIX=(o)@ CHANMODES=k,l,i,t NETWORK=myircc :are supported by this server\r\n";
+	message = ":" + std::string(SERVER_NAME) + std::string(" 005 ") + nick + " :CHANTYPES=# PREFIX=(o)@ CHANMODES=k,l,i,t NETWORK=simple_irc :are supported by this server\r\n";
 	safe_send(uservect, fd, message);
 }
 
 void execUser(Command cmd, int fd, std::vector<User> & uservect)
 {
 	size_t i = searchVectWithFd(uservect, fd);
-	if (i < uservect.size())
-	{
-		if (usernameAlredySet(i, uservect, fd))
-			return ;
-		if (!argumentsArePresent(cmd, uservect, 4, uservect[i].getNickName(), fd))
-			return ;
+/* 	if (i < uservect.size())
+	{ */
+	if (usernameAlredySet(i, uservect, fd))
+		return ;
+	if (!argumentsArePresent(cmd, uservect, 4, uservect[i].getNickName(), fd))
+		return ;
 
-		std::string newusername = cmd.params[0];
-		std::string realname;
-		if(cmd.params.size() >= 4)
-			realname = cmd.params[3];
-		else
-			realname = cmd.trailing;
+	std::string newusername = cmd.params[0];
+	std::string realname;
+	if(cmd.params.size() >= 4)
+		realname = cmd.params[3];
+	else
+		realname = cmd.trailing;
 
 
-		if (!isValidusername(newusername, fd, uservect[i].getNickName(), uservect))
-			return ;
-		uservect[i].setUserName(newusername);
-		uservect[i].setRealName(realname);
-		uservect[i].setIsVerified();
+	if (!isValidusername(newusername, fd, uservect[i].getNickName(), uservect))
+		return ;
+	uservect[i].setUserName(newusername);
+	uservect[i].setRealName(realname);
+	uservect[i].setIsVerified();
 
-		send_welcome_messages(i, uservect, fd);
-	}
+	send_welcome_messages(i, uservect, fd);
+/* 	}
 	else
 	{
 		std::cerr << "Problemaa non trovato fd" << std::endl;
-	}
+	} */
 }

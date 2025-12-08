@@ -46,9 +46,13 @@ void execPart(Command & cmd, int fd,  std::vector<User>& users, std::vector<Chan
     size_t ch_idx = searchChannel(channels, channelName);
 
     Channel &chan = channels[ch_idx];
-    //User &usr = users[usr_idx];
-    std::string trailing = cmd.trailing.empty() ? nick : cmd.trailing;
-    std::string msg = ":" + nick + " PART " + channelName + " :" + trailing + "\r\n";
+
+    std::string msg;
+    if (!cmd.trailing.empty())
+        msg = ":" + nick + " PART " + channelName + " :" + cmd.trailing + "\r\n";
+    else
+        msg = ":" + nick + " PART " + channelName + "\r\n";
+
     chan.sendToAll(users, msg, fd);
     chan.removeUser(fd);
     if (channels[ch_idx].getUsersSize() == 0 || (channels[ch_idx].getUsersSize() == 1 && (channels[ch_idx].getListOfNicks(users) == "@bot" || channels[ch_idx].getListOfNicks(users) == "bot")))

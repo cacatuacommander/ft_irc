@@ -100,7 +100,7 @@ void trySendBuffer(std::vector<User> & uservect, std::vector<Channel> & channelv
 		}
 		else
 		{
-			std::cerr << " sei quaa " << std::endl;
+			//std::cerr << " sei quaa " << std::endl;
 			/* (void) channelvect;
 			(void) fds; */
 			size_t ind = searchVectWithFd(uservect, fds[i].fd);

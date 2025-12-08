@@ -42,7 +42,7 @@ bool checkParamsKick(const Command &cmd, const std::string &nick, int fd, std::v
 	if (targetIdx == uservect.size())
 	{
 		std::string msg = ":" + std::string(SERVER_NAME) + " 401 " + nick +
-						  " " + targetNick + " :No such nick\r\n";
+						   " " + channelName + " " + targetNick + " :No such nick\r\n";
 		safe_send(uservect, fd, msg);
 		return false;
 	}
@@ -50,7 +50,7 @@ bool checkParamsKick(const Command &cmd, const std::string &nick, int fd, std::v
 	if (!channel.userIsInChannel(uservect[targetIdx].getFd()))
 	{
 		std::string msg = ":" + std::string(SERVER_NAME) + " 441 " + nick +
-						  " " + targetNick + " " + channelName +
+						  " " + channelName + " " + targetNick +
 						  " :They aren't on that channel\r\n";
 		safe_send(uservect, fd, msg);
 		return false;
@@ -71,12 +71,18 @@ void execKick(Command cmd, int fd, std::vector<Channel>& channelVect, std::vecto
 	User &sender = uservect[sender_index];
 	User &target = uservect[target_index];
 
-	std::string kick_reason = cmd.trailing.empty() ? sender.getNickName() : cmd.trailing;
-	std::string msg = ":" + sender.getNickName() + "!" +
+	std::string msg;
+	if (cmd.trailing.empty())
+		msg = ":" + sender.getNickName() + "!" +
 				sender.getUserName() + "@" +
 				sender.getIp() + " KICK " +
-				channel.getName() + " " +
-				target.getNickName() + " :" + kick_reason + "\r\n";
+				channel.getName() + " " + target.getNickName() + " :No reason given\r\n";
+	else
+		msg = ":" + sender.getNickName() + "!" +
+				sender.getUserName() + "@" +
+				sender.getIp() + " KICK " +
+				channel.getName() + " " + target.getNickName() + " :" + cmd.trailing + "\r\n";
+	
 
 	channel.sendToAll(uservect, msg, fd);
 	channel.removeUser(target.getFd());
