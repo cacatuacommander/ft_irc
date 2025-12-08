@@ -6,12 +6,11 @@ void execQuit(Command cmd, int fd, std::vector<User>& uservect, std::vector<Chan
 	if (ind == uservect.size())
 		return;
 
-	// Determina messaggio di quit
 	std::string quittingMessage;
 	if (!cmd.trailing.empty())
 		quittingMessage = cmd.trailing;
 	else
-		quittingMessage = "Client exited";
+		quittingMessage = "Client Quit";
 
 	std::string msg = ":" + uservect[ind].getNickName() + " QUIT :" + quittingMessage + "\r\n";
 	size_t sizee = channelVect.size();

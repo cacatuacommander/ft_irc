@@ -32,15 +32,6 @@ Command Parser::parse(const std::string& input, std::vector<User> & usr_vec, con
 
      std::string nick = curr_usr->getNickName().empty() ? "*" : curr_usr->getNickName();
 
-	 //ho commentato questo perche ora lo facciamo fuori quindi non serve piu credo
-/*	if (tmp.size() < 4 || tmp[tmp.size() - 1] != '\n' || tmp[tmp.size() - 2] != '\r') {
-		std::string err = ":" + std::string(SERVER_NAME) + " 421 " + nick + " :Unknown command babo\r\n";
-		safe_send(usr_vec, fd, err);
-		return cmd;
-	}
-	else
-		tmp.erase(tmp.size()-2, 2); */
-
 	size_t pos = tmp.find(" :");
 	if (pos != std::string::npos)
 	{

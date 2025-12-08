@@ -14,7 +14,7 @@ bool argumentsArePresent(Command cmd, std::vector<User> & uservect, unsigned int
 	if (argsn >= numbofargneeded)
 		return true;
 
-	std::string reply = std::string(SERVER_NAME) + std::string(" 461 ") + nickname + " " + cmd.name + " :Not enough parameters\r\n";
+	std::string reply = ":" + std::string(SERVER_NAME) + std::string(" 461 ") + nickname + " " + cmd.name + " :Not enough parameters\r\n";
 	safe_send(uservect, fd, reply);
 
 	return false;

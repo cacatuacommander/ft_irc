@@ -267,7 +267,7 @@ int main(int argc, char** argv)
 			}
 			else if (fds[i].revents & POLLOUT && !uservect[i].sendBufferEmpty())
 			{
-				std::cout << "quaaa " << std::endl;
+				//std::cout << "quaaa " << std::endl;
 				trySendBuffer(uservect, channelvect, fds, i);
 			}
 		}

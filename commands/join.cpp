@@ -4,7 +4,7 @@
 void succesfulJoinMessages(Command & cmd, std::string & nickname, std::string & channelname, int fd, std::vector<Channel> & channelvect, size_t ch_i, std::vector<User> & uservect, size_t i)
 {
 	//:<nick>!<user>@<host> JOIN <channel>
-	std::string message = ":" + nickname + "!" + uservect[i].getUserName() + "@" + uservect[i].getIp() + " " + cmd.name + " " + channelname + "\r\n";
+	std::string message = ":" + nickname + "!" + uservect[i].getUserName() + "@" + uservect[i].getIp() +  " " + cmd.name + " " + channelname + "\r\n";
 
 	safe_send(uservect, fd, message);
 	channelvect[ch_i].sendToAll(uservect, message, fd);
@@ -160,7 +160,7 @@ void execJoin(Command & cmd, int fd, std::vector<User> & uservect, std::vector<C
 
 	if (ch_i  == channelvect.size())
 	{
-		createChannel(cmd, nickname, channelname, fd, channelvect, ch_i, uservect, i);//controllare anche e ci sono già troppi canali?
+		createChannel(cmd, nickname, channelname, fd, channelvect, ch_i, uservect, i);//controllare anche e ci sono già troppi canali? ,a e opzionale
 	}
 	else
 	{

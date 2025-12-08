@@ -14,7 +14,7 @@ const int SERVER_PORT = 6667;
 const char* BOT_NICK = "bot";
 const char* BOT_USER = "bot 0 * :User List Bot";
 const char* BOT_PASS = "pass";
-const std::string bw_list[] = {"CAZZO", "VAFFANCULO", "MERDA", "PUTTANA", "FROCIO", "NEGRO", "NIGGA"};
+const std::string bw_list[] = {"CAZZO", "VAFFANCULO", "MERDA", "PUTTANA", "FROCIO", "NEGRO"};
 const int bw_n = 6;
 
 // Funzione helper per inviare dati
