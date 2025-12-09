@@ -82,8 +82,12 @@ void execKick(Command cmd, int fd, std::vector<Channel>& channelVect, std::vecto
 				sender.getUserName() + "@" +
 				sender.getIp() + " KICK " +
 				channel.getName() + " " + target.getNickName() + " :" + cmd.trailing + "\r\n";
-	
 
-	channel.sendToAll(uservect, msg, fd);
+	safe_send(uservect, fd, msg);
+	channel.sendToAll(uservect, msg, fd);	
 	channel.removeUser(target.getFd());
+	if (channel.getUsersSize() == 0 || (channel.getUsersSize() == 1 && (channel.getListOfNicks(uservect) == "@bot" || channel.getListOfNicks(uservect) == "bot")))
+		channelVect.erase(channelVect.begin() + channel_index);
+
+
 }

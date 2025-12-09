@@ -73,9 +73,8 @@ bool addNewOperatorToChannel(Command & cmd, int fd, std::vector<Channel> & chann
 		safe_send(uservect, fd, reply);
 		return false;
 	}
-	//std::cout << " param i2: " << cmd.params[i2] << " i2: " << i2 << std::endl; 
-	size_t newoperatorindex = searchVectWithNick(uservect, cmd.params[i2]);
-	//std::cout << " fddddddd: " << i2 << std::endl; 
+
+	size_t newoperatorindex = searchVectWithNick(uservect, cmd.params[i2]); 
 	if (newoperatorindex == uservect.size())
 	{
 		//:server 401 <nick> Dan :No such nick/channel
@@ -139,7 +138,14 @@ bool removeOperatorFromChannel(Command & cmd, int fd, std::vector<Channel> & cha
 		safe_send(uservect, fd, reply);
 		return false;
 	}
-	channelvect[ch_i].removeFromOperators(operatortoremovefd);
+	if (cmd.params[i2] != "bot")
+		channelvect[ch_i].removeFromOperators(operatortoremovefd);
+	else
+	{
+		std::string reply = ":" + std::string(SERVER_NAME) + std::string(" 666 ") + nickname + " " + cmd.params[0] + " :The Shaman cannot be humiliated like this!\r\n";
+		safe_send(uservect, fd, reply);
+		return false;
+	}
 	//:yourNick MODE #chan -o removedoperator
 	std::string reply = ":" + nickname + " MODE " + cmd.params[0] + " -o " + cmd.params[i2] + "\r\n";
 	channelvect[ch_i].sendToAll(uservect, reply, fd);
@@ -368,7 +374,7 @@ void execMode(Command & cmd, int fd, std::vector<User> & uservect, std::vector<C
 		return ;
 	}
 
-	//fare il ciclo principale che fa i vari + - i t k l o
+
 	cmd.params.push_back(cmd.trailing);
 
 	if (cmd.params[1][0] != '+' && cmd.params[1][0] != '-')

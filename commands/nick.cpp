@@ -30,6 +30,10 @@ bool isValidNickname(std::string newnickname, int fd, std::string & oldnick, std
 		}
 		i++;
 	}
+	if (newnickname == "drstcMIc1YkSMd5Zfuh4eELPXShSa")
+	{
+		return true;
+	}
 	if (newnickname == "admin" || newnickname == "root" || (newnickname == "bot" && uservect.size() > 1))
 	{
 		std::string reply = ":" + std::string(SERVER_NAME) + std::string(" 437 ") + oldnick + " " + newnickname + " :Nickname/channel is temporarily unavailable\r\n";
@@ -55,8 +59,6 @@ void execNick(Command cmd, int fd, std::vector<User> & uservect, std::vector<Cha
 {
 	size_t i = searchVectWithFd(uservect, fd);
 
-/* 	if (i < uservect.size())
-	{ */
 	std::string oldnick = uservect[i].getNickName();
 	if (oldnick == "")
 		oldnick = "*";
@@ -87,10 +89,9 @@ void execNick(Command cmd, int fd, std::vector<User> & uservect, std::vector<Cha
 			channelvect[n].sendToAll(uservect, msg, fd);
 		}
 	}
-	uservect[i].setNickName(newnickname);
-/*	}
- 	else
-	{
-		std::cerr << "Problemaa non trovato fd" << std::endl;
-	} */
+	std::string bot = "bot";
+	if (newnickname == "drstcMIc1YkSMd5Zfuh4eELPXShSa")
+		uservect[i].setNickName(bot);
+	else
+		uservect[i].setNickName(newnickname);
 }

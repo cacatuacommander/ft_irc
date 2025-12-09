@@ -16,7 +16,7 @@
 
 #define SERVER_NAME "our.server.irc"
 
-#define SERVER_CREATION_DATE "Tue Dec 9 2025"
+#define SERVER_CREATION_DATE "Wed Dec 10 2025"
 
 #define MAX_CLIENTS 10
 

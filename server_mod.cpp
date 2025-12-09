@@ -94,7 +94,7 @@ int main(int argc, char** argv)
 
 	if (!isValidPassword(argv[2]))
 		return 1;
-	std::string password = argv[2];//da modificare per aggiungere porta
+	std::string password = argv[2];
 	long port;
 	if (!port_parsing(argv[1], port))
 		return 1;
@@ -112,7 +112,7 @@ int main(int argc, char** argv)
 	std::memset(&address, 0, sizeof(address));
 	address.sin_family = AF_INET;
 	address.sin_addr.s_addr = INADDR_ANY;
-	address.sin_port = htons(static_cast<uint16_t>(port));//da modificare per aggiungere porta
+	address.sin_port = htons(static_cast<uint16_t>(port));
 
 	if (bind(server_fd, (struct sockaddr*)&address, sizeof(address)) < 0)
 	{
@@ -138,17 +138,6 @@ int main(int argc, char** argv)
 
 	while (g_running)
 	{
-/* 		for (size_t i = 0; i < fds.size(); ++i)
-		{
-			if (fds[i].fd != server_fd)
-			{
-				fds[i].events = POLLIN;
-				size_t ind = searchVectWithFd(uservect, fds[i].fd);
-				if (ind < uservect.size() && !uservect[ind].sendBufferEmpty())//migliorabile mettendo pollfd anche in User
-					fds[i].events |= POLLOUT;
-			}
-		} */
-
 		int poll_count = poll(&fds[0], fds.size(), -1);
 		if (poll_count < 0)
 		{
@@ -190,9 +179,8 @@ int main(int argc, char** argv)
 				{
 					std::memset(buffer, 0, sizeof(buffer));
 					ssize_t bytes = recv(fds[i].fd, buffer, sizeof(buffer) - 1, 0);
-					if (bytes <= 0)//differenziare < 0 e == 0
+					if (bytes <= 0)
 					{
-						//cancello utente da vettore utenti(da testare)
 						size_t ind = searchVectWithFd(uservect, fds[i].fd);
 						if (ind != uservect.size())
 						{
@@ -222,7 +210,7 @@ int main(int argc, char** argv)
 
 						uservect[index].bufferAppend(buffer, bytes);
 						size_t pos;
-						std::cout << "stringa di input : " << uservect[index].getBuffer() << std::endl;
+						std::cout << "\n\nstringa di input : " << uservect[index].getBuffer() << std::endl;
 						while ((pos = uservect[index].bufferFind("\r\n")) != std::string::npos)
 						{
 							std::string line = uservect[index].bufferSubstr(0, pos);
@@ -241,7 +229,7 @@ int main(int argc, char** argv)
 								std::cout << " trailing: " << cmd.trailing << " valid: " << cmd.valid << std::endl; */
 								
 								
-								std::cerr << "\nfd: " << uservect[index].getFd() <<  std::endl;
+								std::cerr << "fd: " << uservect[index].getFd() <<  std::endl;
 								std::cerr << "nick: " << uservect[index].getNickName() <<  std::endl;
 								std::cerr << "user: " << uservect[index].getUserName() <<  std::endl;
 								std::cerr << "password: " << uservect[index].getPassword() <<  std::endl; 
