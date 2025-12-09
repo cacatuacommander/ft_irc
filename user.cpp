@@ -1,7 +1,7 @@
 
 #include "user.hpp"
 
-User::User(int newFd, std::string newip) : nickname(""), username (""), ip(newip), hasputpassword(false), fd(newFd), isverified(false), buffer("") {}
+User::User(int newFd, std::string & newip/* , struct pollfd & newpollfd */) : nickname(""), username (""), ip(newip),/*  pollfd(newpollfd),  */hasputpassword(false), fd(newFd), isverified(false), buffer("") {}
 
 User::~User() {}
 

@@ -73,12 +73,12 @@ void safe_send(std::vector<User> & uservect, int fd, std::string & toAdd)
 	size_t i = searchVectWithFd(uservect, fd);
 	if (i < uservect.size())
 		uservect[i].addToSendBuffer(toAdd);
-	int n = send(fd, toAdd.c_str(), toAdd.size(), 0);
+/* 	int n = send(fd, toAdd.c_str(), toAdd.size(), 0);
 	if (n > 0)
 	{
-		if (i < uservect.size() && static_cast<size_t>(n) < uservect[i].sendBufferSize())
+		if (i < uservect.size() && static_cast<size_t>(n) <= uservect[i].sendBufferSize())
 			uservect[i].sendBufferErase(0, n);
-	}
+	} */
 }
 
 void trySendBuffer(std::vector<User> & uservect, std::vector<Channel> & channelvect, std::vector<pollfd> & fds, size_t & i)
@@ -86,11 +86,12 @@ void trySendBuffer(std::vector<User> & uservect, std::vector<Channel> & channelv
 	while (i < uservect.size() && !uservect[i].sendBufferEmpty())
 	{
 		int n = send(uservect[i].getFd(), uservect[i].sendBufferCstr(), uservect[i].sendBufferSize(), 0);
+		std::cerr << "n: " << n << " send_buffer: '" << uservect[i].sendBufferCstr() << "'" << std::endl;
 		if (n > 0)
 		{
-			if (i < uservect.size() && static_cast<size_t>(n) < uservect[i].sendBufferSize())
+			if (i < uservect.size() && static_cast<size_t>(n) <= uservect[i].sendBufferSize())
 			{
-				//std::cerr << " sei quiii111" << std::endl;
+				std::cerr << " sei quiii111" << std::endl;
 				uservect[i].sendBufferErase(0, n);  // remove bytes that were sent
 			}
 		}
@@ -100,7 +101,7 @@ void trySendBuffer(std::vector<User> & uservect, std::vector<Channel> & channelv
 		}
 		else
 		{
-			//std::cerr << " sei quaa " << std::endl;
+			std::cerr << " sei quaa " << std::endl;
 			/* (void) channelvect;
 			(void) fds; */
 			size_t ind = searchVectWithFd(uservect, fds[i].fd);

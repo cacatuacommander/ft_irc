@@ -142,7 +142,7 @@ bool removeOperatorFromChannel(Command & cmd, int fd, std::vector<Channel> & cha
 		channelvect[ch_i].removeFromOperators(operatortoremovefd);
 	else
 	{
-		std::string reply = ":" + std::string(SERVER_NAME) + std::string(" 666 ") + nickname + " " + cmd.params[0] + " :The Shaman cannot be humiliated like this!\r\n";
+		std::string reply = ":" + std::string(SERVER_NAME) + std::string(" 696 ") + nickname + " " + cmd.params[0] + " :The Shaman cannot be humiliated like this!\r\n";
 		safe_send(uservect, fd, reply);
 		return false;
 	}

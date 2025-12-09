@@ -105,6 +105,8 @@ int main(int argc, char** argv)
 		std::cerr << "socket() failed\n";
 		return 1;
 	}
+	int flags = fcntl(server_fd, F_GETFL, 0);
+	fcntl(server_fd, F_SETFL, flags | O_NONBLOCK);
 
 	int opt = 1;
 	setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
@@ -138,6 +140,26 @@ int main(int argc, char** argv)
 
 	while (g_running)
 	{
+	/* 	for (size_t i = 0; i < fds.size(); ++i)
+		{
+			if (fds[i].fd != server_fd)
+			{
+				fds[i].events = POLLIN;
+				size_t ind = searchVectWithFd(uservect, fds[i].fd);
+				if (ind < uservect.size() && !uservect[ind].sendBufferEmpty())//migliorabile mettendo pollfd anche in User
+					fds[i].events |= POLLOUT;
+			}
+		} */
+		for (size_t i = 0; i < fds.size(); ++i)
+		{
+			if (fds[i].fd != server_fd)
+			{
+				fds[i].events = POLLIN;
+				size_t ind = i - 1;
+				if (ind < uservect.size() && !uservect[ind].sendBufferEmpty())//migliorabile mettendo pollfd anche in User
+					fds[i].events |= POLLOUT;
+			}
+		} 
 		int poll_count = poll(&fds[0], fds.size(), -1);
 		if (poll_count < 0)
 		{
@@ -148,6 +170,12 @@ int main(int argc, char** argv)
 		{
 			if (fds[i].revents & (POLLERR | POLLHUP | POLLNVAL))
 			{
+				if (fds[i].fd == server_fd)
+				{
+					std::cerr << "Server listening socket error, exiting" << std::endl;
+					g_running = false;
+					break;
+				}
 				size_t ind = searchVectWithFd(uservect, fds[i].fd);
 				if (ind != uservect.size())
 				{
@@ -166,12 +194,14 @@ int main(int argc, char** argv)
 				if (fds[i].fd == server_fd)
 				{
 					int new_fd = accept(server_fd, (struct sockaddr*)&address, &addrlen);
+					int fl = fcntl(new_fd, F_GETFL, 0);
+					fcntl(new_fd, F_SETFL, fl | O_NONBLOCK);
 					if (new_fd >= 0)
 					{
 						std::cout << "New client connected (fd=" << new_fd << ")\n";
 						fds.push_back((pollfd){ new_fd, POLLIN, 0 });
 						std::string user_ip = inet_ntoa(address.sin_addr);
-						uservect.push_back(User(new_fd, user_ip));
+						uservect.push_back(User(new_fd, user_ip/* , (pollfd){ new_fd, POLLIN, 0 } */));
 					}
 				}
 				// b) Client socket → incoming message
@@ -232,11 +262,11 @@ int main(int argc, char** argv)
 								std::cerr << "fd: " << uservect[index].getFd() <<  std::endl;
 								std::cerr << "nick: " << uservect[index].getNickName() <<  std::endl;
 								std::cerr << "user: " << uservect[index].getUserName() <<  std::endl;
-								std::cerr << "password: " << uservect[index].getPassword() <<  std::endl; 
+								std::cerr << "password: " << uservect[index].getPassword() << "\n" << std::endl; 
 
 /* 								Command cmd;
 								cmd.name = line;
-								cmd.params.push_back(line.substr(2, password.size()));
+								cmd.pafcntlrams.push_back(line.substr(2, password.size()));
 								cmd.valid = true;
 								
 								if (line[0] == 'P')
@@ -253,10 +283,13 @@ int main(int argc, char** argv)
 					}
 				}
 			}
-			else if (fds[i].revents & POLLOUT && !uservect[i].sendBufferEmpty())
+			else if (i != 0 && fds[i].revents & POLLOUT && !uservect[i - 1].sendBufferEmpty())
 			{
-				//std::cout << "quaaa " << std::endl;
+				std::cout << "quaaa " << std::endl;
+				//size_t ind = searchVectWithFd(uservect, fds[i].fd);
+				--i;
 				trySendBuffer(uservect, channelvect, fds, i);
+				++i;
 			}
 		}
 	}

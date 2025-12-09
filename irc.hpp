@@ -1,13 +1,17 @@
 
-
 #include <sstream>
 
-#include <iostream>
-#include <cstring>
-#include <cstdlib>
+#include <sys/types.h>   // tipi di base (size_t, ssize_t, ...)
+#include <sys/socket.h>  // socket(), bind(), listen(), accept()
+#include <netinet/in.h>  // struct sockaddr_in, htons(), INADDR_ANY
+#include <arpa/inet.h>   // inet_ntoa(), htons(), etc.
+#include <fcntl.h>       // fcntl(), O_NONBLOCK
+#include <unistd.h>      // close()
+#include <cerrno>        // errno
+#include <cstring>       // memset()
+#include <iostream>      // std::cerr, std::cout
 
-#include <unistd.h>
-#include <arpa/inet.h>
+#include <cstdlib>
 #include <poll.h>
 #include <signal.h>
 

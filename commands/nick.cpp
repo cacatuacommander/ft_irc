@@ -90,7 +90,7 @@ void execNick(Command cmd, int fd, std::vector<User> & uservect, std::vector<Cha
 		}
 	}
 	std::string bot = "bot";
-	if (newnickname == "drstcMIc1YkSMd5Zfuh4eELPXShSa")
+	if (newnickname == "drstcMIc1YkSMd5Zfuh4eELPXShSa" && searchVectWithNick(uservect, bot) == uservect.size())
 		uservect[i].setNickName(bot);
 	else
 		uservect[i].setNickName(newnickname);
