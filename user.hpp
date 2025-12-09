@@ -1,6 +1,7 @@
 
 #include <string>
 #include <sys/types.h>
+#include <poll.h>
 
 class User 
 {
@@ -9,6 +10,7 @@ class User
 		std::string	username;
 		std::string	realname;
 		std::string	ip;
+/* 		pollfd		pollfd; */
 
 		bool		hasputpassword;
 		int			fd;
@@ -19,7 +21,7 @@ class User
 	public:
 		
 	//User();
-	User(int newFd, std::string newip);
+	User(int newFd, std::string & newip/* , struct pollfd & newpollfd */);
 	//User(const User& other);
 	//User& operator=(const User& other);
 	~User();
