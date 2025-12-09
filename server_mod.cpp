@@ -146,7 +146,7 @@ int main(int argc, char** argv)
 			{
 				fds[i].events = POLLIN;
 				size_t ind = searchVectWithFd(uservect, fds[i].fd);
-				if (ind < uservect.size() && !uservect[ind].sendBufferEmpty())//migliorabile mettendo pollfd anche in User
+				if (ind < uservect.size() && !uservect[ind].sendBufferEmpty())//fattibile meglio anche mettendo pollfd in User?
 					fds[i].events |= POLLOUT;
 			}
 		} */
@@ -156,7 +156,7 @@ int main(int argc, char** argv)
 			{
 				fds[i].events = POLLIN;
 				size_t ind = i - 1;
-				if (ind < uservect.size() && !uservect[ind].sendBufferEmpty())//migliorabile mettendo pollfd anche in User
+				if (ind < uservect.size() && !uservect[ind].sendBufferEmpty())
 					fds[i].events |= POLLOUT;
 			}
 		} 
