@@ -16,11 +16,10 @@ class Channel
 		
 		bool				istopicrestricted;
 		bool				isinviteonly;
-		//bool				onlyopsmaysettopic;
 
 		std::string			password;//e password è "" vuol dire che canale non ha password
 
-		int					userlimit;//if userlimit i negative it mean there i no userlimit for the channel
+		int					userlimit;//if userlimit is negative it means there i no userlimit for the channel
 
 	public:
 

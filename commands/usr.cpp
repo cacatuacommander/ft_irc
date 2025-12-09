@@ -62,8 +62,7 @@ void send_welcome_messages(int i, std::vector<User> & uservect, int fd)
 void execUser(Command cmd, int fd, std::vector<User> & uservect)
 {
 	size_t i = searchVectWithFd(uservect, fd);
-/* 	if (i < uservect.size())
-	{ */
+
 	if (usernameAlredySet(i, uservect, fd))
 		return ;
 	if (!argumentsArePresent(cmd, uservect, 4, uservect[i].getNickName(), fd))
@@ -84,9 +83,5 @@ void execUser(Command cmd, int fd, std::vector<User> & uservect)
 	uservect[i].setIsVerified();
 
 	send_welcome_messages(i, uservect, fd);
-/* 	}
-	else
-	{
-		std::cerr << "Problemaa non trovato fd" << std::endl;
-	} */
+
 }

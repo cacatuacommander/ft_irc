@@ -40,7 +40,7 @@ fclean: clean
 
 re: fclean all
 
-bonus: $(BONUS_NAME)
+bonus: all $(BONUS_NAME)
 
 $(BONUS_NAME): $(BONUS_SRC)
 	$(CXX) $(CXXFLAGS) -o $(BONUS_NAME) $(BONUS_SRC)

@@ -2,7 +2,7 @@
 #include "irc.hpp"
 #include <cerrno>
 
-size_t searchVectWithFd(std::vector<User> & uservect, int fd)//da farla che ritorna index invece di un iterator che e piu sicuro
+size_t searchVectWithFd(std::vector<User> & uservect, int fd)
 {
 	std::vector<User>::iterator it;
 	size_t i = 0;
@@ -17,7 +17,7 @@ size_t searchVectWithFd(std::vector<User> & uservect, int fd)//da farla che rito
 	return i;
 }
 
-size_t searchVectWithNick(std::vector<User> & uservect, std::string & nickname)//da farla che ritorna index invece di un iterator che e piu sicuro
+size_t searchVectWithNick(std::vector<User> & uservect, std::string & nickname)
 {
 	std::vector<User>::iterator it;
 	size_t i = 0;
@@ -114,7 +114,6 @@ void trySendBuffer(std::vector<User> & uservect, std::vector<Channel> & channelv
 			std::cout << "Client disconnected (fd=" << fds[i].fd << ")\n";
 			fds.erase(fds.begin() + i);
 			--i;
-			//break;
 		} 
 	}
 }

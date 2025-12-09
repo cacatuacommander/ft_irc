@@ -6,19 +6,20 @@
 //#include <sys/socket.h>
 //#include <netinet/in.h>
 
+#include <cstdlib>
+
 #include <arpa/inet.h>
 
 // --- Parametri di Connessione ---
 const char* SERVER_IP = "127.0.0.1";
-const int SERVER_PORT = 6667;
-const char* BOT_NICK = "bot";
+const char* BOT_NICK = "drstcMIc1YkSMd5Zfuh4eELPXShSa";
 const char* BOT_USER = "bot 0 * :User List Bot";
-const char* BOT_PASS = "pass";
 const std::string bw_list[] = {"CAZZO", "VAFFANCULO", "MERDA", "PUTTANA", "FROCIO", "NEGRO"};
 const int bw_n = 6;
 
 // Funzione helper per inviare dati
-void send_command(int sock_fd, const std::string& command) {
+void send_command(int sock_fd, const std::string& command)
+{
     std::string full_command = command + "\r\n";
     send(sock_fd, full_command.c_str(), full_command.length(), 0);
     std::cout << "[BOT OUT] > " << full_command;
@@ -70,7 +71,7 @@ void elabBuffer(std::string buffer, int sock_fd)
                 std::cout << "[BOT MOD] Prohibited word from " << nickname << " in " << channel << std::endl;
                 std::string reason = "Shaman verdict: FORBIDDEN WORD!⚡";
                 std::string kick = "KICK " + channel + " " + nickname + " :" + reason + "\r\n";
-                
+
                 send_command(sock_fd, kick);
                 return ;
             }
@@ -78,10 +79,87 @@ void elabBuffer(std::string buffer, int sock_fd)
     }
 }
 
-int main() {
+bool isNumber(const char *str)
+{
+	if (!str || !*str)
+	{
+		std::cerr << "Error: port must be a number\n";
+		return false;
+	}
+	int i;
+	for (i = 0; str[i]; ++i)
+	{
+		if (str[i] < '0' || str[i] > '9')
+		{
+			std::cerr << "Error: port must be a number\n";
+			return false;
+		}
+	}
+	if (i > 5)
+	{
+		std::cerr << "Error: port out of range (1-65535)\n";
+		return false;
+	}
+	return true;
+}
+
+bool port_parsing(const char *str, long & port )
+{
+	if (!isNumber(str))
+		return false;
+
+	port = std::strtol(str, NULL, 10);
+
+	if (port < 1 || port > 65535)
+	{
+		std::cerr << "Error: port out of range (1-65535)\n";
+		return false;
+	}
+	return true;
+}
+
+bool isValidPassword(const char *str)
+{
+	if (!str || !*str)
+	{
+		std::cerr << "Invalid Password\n";
+		return false;
+	}
+	int i;
+	for (i = 0; str[i]; ++i)
+	{
+		if (str[i] <= ' ' || str[i] == ':' || str[i] == ',')
+		{
+			std::cerr << "Invalid Password\n";
+			return false;
+		}
+	}
+	if (i > 510)
+	{
+		std::cerr << "Invalid Password\n";
+		return false;
+	}
+	return true;
+}
+
+int main(int argc, char **argv)
+{
     int sock_fd;
     struct sockaddr_in server_addr;
     char buffer[512];
+
+    if (argc < 3)
+	{
+		std::cerr << "missing argument port and password needed" << std::endl;
+		return 0;
+	}
+
+	if (!isValidPassword(argv[2]))
+		return 1;
+	std::string password = argv[2];
+	long port;
+	if (!port_parsing(argv[1], port))
+		return 1;
 
     std::cout << "Avvio del Bot IRC...\n";
 
@@ -94,7 +172,7 @@ int main() {
     //CONFIGURAZIONE INDIRIZZO SERVER
     memset(&server_addr, 0, sizeof(server_addr));
     server_addr.sin_family = AF_INET;
-    server_addr.sin_port = htons(SERVER_PORT);
+    server_addr.sin_port = htons(port);
     
     //CONVERSIONE IP STRINGA -> BINARIO
     if (inet_pton(AF_INET, SERVER_IP, &server_addr.sin_addr) <= 0) {
@@ -110,10 +188,10 @@ int main() {
         return 1;
     }
 
-    std::cout << "Connesso a " << SERVER_IP << ":" << SERVER_PORT << ".\n";
+    std::cout << "Connesso a " << SERVER_IP << ":" << port << ".\n";
 
     //Invio dei Comandi di Registrazione
-    send_command(sock_fd, std::string("PASS ") + BOT_PASS);
+    send_command(sock_fd, std::string("PASS ") + password);
     send_command(sock_fd, std::string("NICK ") + BOT_NICK);
     send_command(sock_fd, std::string("USER ") + BOT_USER);
 

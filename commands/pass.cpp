@@ -20,8 +20,7 @@ bool passwordAlredyPresent(int fd, std::vector<User> & uservect, int i)
 void execPass(Command cmd, int fd, std::vector<User> & uservect, std::string realpassword)
 {
 	size_t i = searchVectWithFd(uservect, fd);
-/* 	if (i < uservect.size())
-	{ */
+
 	if (passwordAlredyPresent(fd, uservect, i))
 		return ;
 	if (!argumentsArePresent(cmd, uservect, 1, uservect[i].getNickName(), fd))
@@ -41,9 +40,5 @@ void execPass(Command cmd, int fd, std::vector<User> & uservect, std::string rea
 		std::string reply = ":" + std::string(SERVER_NAME) + std::string(" 464 ") + "*" + " :Password incorrect\r\n";
 		safe_send(uservect, fd, reply);
 	}
-/* 	}
-	else
-	{
-		std::cerr << "Problemaa non trovato fd" << std::endl;
-	} */
+
 }

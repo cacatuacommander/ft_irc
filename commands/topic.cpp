@@ -29,7 +29,7 @@ bool checkParamsTopic(const Command &cmd, const std::string &nick, int fd, std::
         return false;
     }
 
-    if (!channel.searchFDinOperators(fd) && !cmd.trailing.empty() && channel.isTopicResticted())
+    if (!channel.searchFDinOperators(fd) && (!cmd.trailing.empty() || cmd.params.size() >= 2) && channel.isTopicResticted())
     {
         std::string msg = ":" + std::string(SERVER_NAME) + " 482 " + nick +
                           " " + channelName + " :You're not channel operator\r\n";
@@ -58,18 +58,22 @@ void execTopic(Command cmd, int fd, std::vector<Channel>& channelVect, std::vect
     User &sender = uservect[sender_index];
 
     std::string msg;
-    if (cmd.trailing.empty() && cmd.ghost_trail == false)
+    if (cmd.trailing.empty() && cmd.params.size() < 2 && cmd.ghost_trail == false)
     {
         if (channel.getTopic() == "No topic is set") 
             msg = ":" + std::string(SERVER_NAME) + " 331 " + sender.getNickName() + " " + channel.getName() + " :" + channel.getTopic() + "\r\n";
         else
             msg = ":" + std::string(SERVER_NAME) + " 332 " + sender.getNickName() + " " + channel.getName() + " :" + channel.getTopic() + "\r\n";
-        channel.sendToAll(uservect, msg, fd);
         safe_send(uservect, fd, msg);
     }
     else
     {
-        channel.changeTopic(cmd.trailing);
+        std::string newtopic;
+        if (cmd.trailing.empty())
+            newtopic = cmd.params[1];
+        else
+            newtopic = cmd.trailing;
+        channel.changeTopic(newtopic);
         msg = ":" + sender.getNickName() + " TOPIC " + channel.getName() + " :" + channel.getTopic() + "\r\n";
         channel.sendToAll(uservect, msg, fd);
         safe_send(uservect, fd, msg);
