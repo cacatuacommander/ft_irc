@@ -146,7 +146,7 @@ int main(int argc, char** argv)
 			{
 				fds[i].events = POLLIN;
 				size_t ind = searchVectWithFd(uservect, fds[i].fd);
-				if (ind < uservect.size() && !uservect[ind].sendBufferEmpty())//migliorabile mettendo pollfd anche in User
+				if (ind < uservect.size() && !uservect[ind].sendBufferEmpty())//fattibile meglio anche mettendo pollfd in User?
 					fds[i].events |= POLLOUT;
 			}
 		} */
@@ -156,7 +156,7 @@ int main(int argc, char** argv)
 			{
 				fds[i].events = POLLIN;
 				size_t ind = i - 1;
-				if (ind < uservect.size() && !uservect[ind].sendBufferEmpty())//migliorabile mettendo pollfd anche in User
+				if (ind < uservect.size() && !uservect[ind].sendBufferEmpty())
 					fds[i].events |= POLLOUT;
 			}
 		} 
@@ -194,10 +194,10 @@ int main(int argc, char** argv)
 				if (fds[i].fd == server_fd)
 				{
 					int new_fd = accept(server_fd, (struct sockaddr*)&address, &addrlen);
-					int fl = fcntl(new_fd, F_GETFL, 0);
-					fcntl(new_fd, F_SETFL, fl | O_NONBLOCK);
 					if (new_fd >= 0)
 					{
+						int fl = fcntl(new_fd, F_GETFL, 0);
+						fcntl(new_fd, F_SETFL, fl | O_NONBLOCK);
 						std::cout << "New client connected (fd=" << new_fd << ")\n";
 						fds.push_back((pollfd){ new_fd, POLLIN, 0 });
 						std::string user_ip = inet_ntoa(address.sin_addr);
@@ -214,19 +214,19 @@ int main(int argc, char** argv)
 						size_t ind = searchVectWithFd(uservect, fds[i].fd);
 						if (ind != uservect.size())
 						{
-							uservect.erase(uservect.begin() + ind);
 							std::string msg;
 							if (bytes == 0) 
 		  						msg = ":" + uservect[ind].getNickName() + " QUIT :Client exited\r\n";
 							else
 								msg = ":" + uservect[ind].getNickName() + " QUIT :Connection lost\r\n";
+							uservect.erase(uservect.begin() + ind);
 							deleteFromGroups(channelvect, fds[i].fd, uservect, msg);
 						}
-						close(fds[i].fd);
 						if (bytes == 0)
 							std::cout << "Client disconnected (fd=" << fds[i].fd << ")\n";
 						else
 							std::cout << "Client unexpectedly disconnected (fd=" << fds[i].fd << ")\n";
+						close(fds[i].fd);
 						fds.erase(fds.begin() + i);
 						--i;
 					}
@@ -285,11 +285,9 @@ int main(int argc, char** argv)
 			}
 			else if (i != 0 && fds[i].revents & POLLOUT && !uservect[i - 1].sendBufferEmpty())
 			{
-				std::cout << "quaaa " << std::endl;
+				//std::cout << "quaaa " << std::endl;
 				//size_t ind = searchVectWithFd(uservect, fds[i].fd);
-				--i;
-				trySendBuffer(uservect, channelvect, fds, i);
-				++i;
+				trySendBuffer(uservect, channelvect, fds, i, i - 1);
 			}
 		}
 	}

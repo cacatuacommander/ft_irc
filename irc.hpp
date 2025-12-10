@@ -52,5 +52,5 @@ void execBotCall(Command cmd, int fd, std::vector<Channel>& channelVect, std::ve
 
 void deleteFromGroups(std::vector<Channel> & channelvect, int fd, std::vector<User>& uservect, std::string msg);
 void safe_send(std::vector<User> & uservect, int fd, std::string & toAdd);
-void trySendBuffer(std::vector<User> & uservect, std::vector<Channel> & channelvect, std::vector<pollfd> & fds, size_t & i);
+void trySendBuffer(std::vector<User> & uservect, std::vector<Channel> & channelvect, std::vector<pollfd> & fds, size_t & fd_i, size_t us_i);
 
