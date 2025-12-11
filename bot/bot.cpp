@@ -21,7 +21,7 @@ const int bw_n = 6;
 void send_command(int sock_fd, const std::string& command)
 {
     std::string full_command = command + "\r\n";
-    send(sock_fd, full_command.c_str(), full_command.length(), 0);
+    send(sock_fd, full_command.c_str(), full_command.length(), MSG_NOSIGNAL);
     std::cout << "[BOT OUT] > " << full_command;
 }
 

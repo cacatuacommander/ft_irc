@@ -84,7 +84,7 @@ int main(int argc, char** argv)
 	sigemptyset(&sa.sa_mask);
 	sa.sa_flags = 0;
 	sigaction(SIGINT, &sa, NULL);
-
+    sigaction(SIGQUIT, &sa, NULL);
 
 	if (argc < 3)
 	{
@@ -194,7 +194,15 @@ int main(int argc, char** argv)
 				if (fds[i].fd == server_fd)
 				{
 					int new_fd = accept(server_fd, (struct sockaddr*)&address, &addrlen);
-					if (new_fd >= 0)
+					if (fds.size() > MAX_CONNECTIONS)
+					{
+						int fl = fcntl(new_fd, F_GETFL, 0);
+						fcntl(new_fd, F_SETFL, fl | O_NONBLOCK);
+						std::string msg = "the server is full!!!!!\r\n";
+						send(new_fd, msg.c_str(), msg.size(), MSG_NOSIGNAL);
+						close(new_fd);
+					}
+					else if (new_fd >= 0)
 					{
 						int fl = fcntl(new_fd, F_GETFL, 0);
 						fcntl(new_fd, F_SETFL, fl | O_NONBLOCK);
@@ -259,22 +267,11 @@ int main(int argc, char** argv)
 								std::cout << " trailing: " << cmd.trailing << " valid: " << cmd.valid << std::endl; */
 								
 								
-								std::cerr << "fd: " << uservect[index].getFd() <<  std::endl;
-								std::cerr << "nick: " << uservect[index].getNickName() <<  std::endl;
-								std::cerr << "user: " << uservect[index].getUserName() <<  std::endl;
-								std::cerr << "password: " << uservect[index].getPassword() << "\n" << std::endl; 
+								std::cout << "fd: " << uservect[index].getFd() <<  std::endl;
+								std::cout << "nick: " << uservect[index].getNickName() <<  std::endl;
+								std::cout << "user: " << uservect[index].getUserName() <<  std::endl;
+								std::cout << "password: " << uservect[index].getPassword() << "\n" << std::endl; 
 
-/* 								Command cmd;
-								cmd.name = line;
-								cmd.pafcntlrams.push_back(line.substr(2, password.size()));
-								cmd.valid = true;
-								
-								if (line[0] == 'P')
-									execPass(cmd, fds[i].fd, uservect, password);
-								else if (line[0] == 'N')
-									execNick(cmd, fds[i].fd, uservect);
-								else if (line[0] == 'U')
-									execUser(cmd, fds[i].fd, uservect); */
 								exec_command(cmd, uservect, channelvect, password, fds ,i);
 							}
 						}

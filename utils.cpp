@@ -88,7 +88,7 @@ void trySendBuffer(std::vector<User> & uservect, std::vector<Channel> & channelv
 {
 	while (us_i < uservect.size() && !uservect[us_i].sendBufferEmpty())
 	{
-		int n = send(uservect[us_i].getFd(), uservect[us_i].sendBufferCstr(), uservect[us_i].sendBufferSize(), 0);
+		int n = send(uservect[us_i].getFd(), uservect[us_i].sendBufferCstr(), uservect[us_i].sendBufferSize(), MSG_NOSIGNAL);
 		//std::cerr << "n: " << n << " send_buffer: '" << uservect[us_i].sendBufferCstr() << "'" << std::endl;
 		if (n > 0)
 		{

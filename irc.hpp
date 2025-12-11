@@ -24,6 +24,8 @@
 
 #define MAX_CLIENTS 10
 
+#define MAX_CONNECTIONS 64
+
 const std::string SERVER_VERSION = "our_ft_irc-1.0";
 
 size_t searchVectWithFd(std::vector<User> & uservect, int fd);
