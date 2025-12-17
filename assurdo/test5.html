@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <title>Transcendence - Custom Sprites</title>
+    <style>
+        body { margin: 0; overflow: hidden; background: #0a0a12; font-family: sans-serif; }
+        #ui { position: absolute; top: 10px; width: 100%; text-align: center; color: #00fff2; pointer-events: none; }
+    </style>
+</head>
+<body>
+    <div id="ui">
+        <h2>CUBE BATTLE: CUSTOM PNG</h2>
+        P1: WASD + [1] | P2: FRECCE + [0]
+    </div>
+
+    <script type="importmap">
+        { "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js" } }
+    </script>
+
+    <script type="module">
+        import * as THREE from 'three';
+
+        // --- INCOLLA QUI LE TUE STRINGHE BASE64 ---
+        // Esempio: const imgDataP1 = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA...";
+        const imgDataP1 = "";
+        const imgDataP2 = "INCOLLA_QUI_IL_TESTO_BASE64_DEL_PLAYER_2";
+
+        // --- SETUP SCENA ---
+        const scene = new THREE.Scene();
+        const aspect = window.innerWidth / window.innerHeight;
+        const d = 6;
+        const camera = new THREE.OrthographicCamera(-d * aspect, d * aspect, d, -d, 1, 1000);
+        camera.position.set(10, 10, 10);
+        camera.lookAt(0, 0, 0);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        scene.add(new THREE.GridHelper(20, 20, 0x00fff2, 0x111122));
+        scene.add(new THREE.AmbientLight(0xffffff, 2));
+
+        const loader = new THREE.TextureLoader();
+
+        class Fighter {
+            constructor(base64Data, startX) {
+                // Carica l'immagine dalla riga di testo
+                const tex = loader.load(base64Data);
+                const mat = new THREE.SpriteMaterial({ map: tex });
+                this.sprite = new THREE.Sprite(mat);
+                this.sprite.scale.set(2, 2, 1); // Dimensione regolabile
+                this.sprite.position.set(startX, 1, 0);
+                scene.add(this.sprite);
+
+                // Hitbox visiva
+                const hitGeo = new THREE.TorusGeometry(0.6, 0.05, 16, 32);
+                const hitMat = new THREE.MeshBasicMaterial({ color: 0x00fff2, transparent: true, opacity: 0 });
+                this.hitRing = new THREE.Mesh(hitGeo, hitMat);
+                this.hitRing.rotation.x = Math.PI / 2;
+                scene.add(this.hitRing);
+
+                this.isAttacking = false;
+                this.facing = new THREE.Vector3(startX > 0 ? -1 : 1, 0, 0);
+            }
+
+            attack() {
+                if (this.isAttacking) return;
+                this.isAttacking = true;
+                this.hitRing.material.opacity = 1;
+                
+                // Feedback: lo sprite "scatta" leggermente
+                this.sprite.position.add(this.facing.clone().multiplyScalar(0.4));
+
+                setTimeout(() => {
+                    this.isAttacking = false;
+                    this.hitRing.material.opacity = 0;
+                    this.sprite.position.sub(this.facing.clone().multiplyScalar(0.4));
+                }, 150);
+            }
+
+            update(keys, up, down, left, right, atkKey) {
+                const move = new THREE.Vector3(0, 0, 0);
+                if (keys[up]) move.z -= 1;
+                if (keys[down]) move.z += 1;
+                if (keys[left]) move.x -= 1;
+                if (keys[right]) move.x += 1;
+
+                if (move.length() > 0) {
+                    move.normalize().multiplyScalar(0.1);
+                    this.sprite.position.add(move);
+                    this.facing.copy(move).normalize();
+                    // Effetto "camminata" (saltello)
+                    this.sprite.position.y = 1 + Math.abs(Math.sin(Date.now() * 0.01)) * 0.2;
+                }
+
+                if (keys[atkKey]) this.attack();
+
+                this.hitRing.position.copy(this.sprite.position);
+                this.hitRing.position.y = 0.1;
+                this.hitRing.position.add(this.facing.clone().multiplyScalar(1));
+            }
+        }
+
+        // Inizializzazione
+        const p1 = new Fighter(imgDataP1, -3);
+        const p2 = new Fighter(imgDataP2, 3);
+
+        const keys = {};
+        window.addEventListener('keydown', (e) => keys[e.code] = true);
+        window.addEventListener('keyup', (e) => keys[e.code] = false);
+
+        function animate() {
+            requestAnimationFrame(animate);
+            p1.update(keys, 'KeyW', 'KeyS', 'KeyA', 'KeyD', 'Digit1');
+            p2.update(keys, 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Digit0');
+
+            // Logica collisione
+            if (p1.isAttacking && p1.hitRing.position.distanceTo(p2.sprite.position) < 1.2) {
+                p2.sprite.material.color.set(0xff0000);
+                setTimeout(() => p2.sprite.material.color.set(0xffffff), 100);
+            }
+            if (p2.isAttacking && p2.hitRing.position.distanceTo(p1.sprite.position) < 1.2) {
+                p1.sprite.material.color.set(0xff0000);
+                setTimeout(() => p1.sprite.material.color.set(0xffffff), 100);
+            }
+
+            renderer.render(scene, camera);
+        }
+        animate();
+    </script>
+</body>
+</html>

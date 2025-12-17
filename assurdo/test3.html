@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <title>Transcendence - Cube Battle Style</title>
+    <style>
+        body { margin: 0; overflow: hidden; background: #0b0e14; font-family: 'Segoe UI', sans-serif; }
+        #ui { position: absolute; top: 20px; width: 100%; text-align: center; color: #00ffcc; pointer-events: none; text-shadow: 0 0 10px #00ffcc; }
+        .controls { font-size: 0.8em; color: #fff; margin-top: 5px; opacity: 0.7; }
+    </style>
+</head>
+<body>
+    <div id="ui">
+        <div style="font-size: 24px; font-weight: bold;">CUBE BATTLE PROTOTYPE</div>
+        <div class="controls">P1: WASD + [1] | P2: FRECCE + [0]</div>
+    </div>
+
+    <script type="importmap">
+        { "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js" } }
+    </script>
+
+    <script type="module">
+        import * as THREE from 'three';
+
+        // --- GENERATORE DI TEXTURE (Senza file esterni) ---
+        function createCharacterTexture(color, isP2 = false) {
+            const canvas = document.createElement('canvas');
+            canvas.width = 128; canvas.height = 128;
+            const ctx = canvas.getContext('2d');
+            // Corpo
+            ctx.fillStyle = color;
+            ctx.fillRect(10, 10, 108, 108);
+            // Occhi
+            ctx.fillStyle = "white";
+            if (!isP2) {
+                ctx.fillRect(70, 30, 20, 20); ctx.fillRect(100, 30, 20, 20); // Guarda a destra
+            } else {
+                ctx.fillRect(10, 30, 20, 20); ctx.fillRect(40, 30, 20, 20); // Guarda a sinistra
+            }
+            // Pupille
+            ctx.fillStyle = "black";
+            if (!isP2) {
+                ctx.fillRect(82, 35, 10, 10); ctx.fillRect(112, 35, 10, 10);
+            } else {
+                ctx.fillRect(12, 35, 10, 10); ctx.fillRect(42, 35, 10, 10);
+            }
+            return new THREE.CanvasTexture(canvas);
+        }
+
+        function createFloorTexture() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 256; canvas.height = 256;
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = "#1a1f2c";
+            ctx.fillRect(0, 0, 256, 256);
+            ctx.strokeStyle = "#00ffcc";
+            ctx.lineWidth = 2;
+            ctx.strokeRect(0, 0, 256, 256);
+            return new THREE.CanvasTexture(canvas);
+        }
+
+        // --- SETUP SCENA ---
+        const scene = new THREE.Scene();
+        const aspect = window.innerWidth / window.innerHeight;
+        const d = 6;
+        const camera = new THREE.OrthographicCamera(-d * aspect, d * aspect, d, -d, 1, 1000);
+        camera.position.set(10, 10, 10);
+        camera.lookAt(0, 0, 0);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setClearColor(0x0b0e14);
+        document.body.appendChild(renderer.domElement);
+
+        // Luce
+        const ambientLight = new THREE.AmbientLight(0xffffff, 1.2);
+        scene.add(ambientLight);
+
+        // Pavimento
+        const floorTex = createFloorTexture();
+        floorTex.wrapS = floorTex.wrapT = THREE.RepeatWrapping;
+        floorTex.repeat.set(10, 10);
+        const floor = new THREE.Mesh(
+            new THREE.PlaneGeometry(20, 20),
+            new THREE.MeshBasicMaterial({ map: floorTex })
+        );
+        floor.rotation.x = -Math.PI / 2;
+        scene.add(floor);
+
+        // --- LOGICA PLAYER ---
+        class Fighter {
+            constructor(color, startX, isP2) {
+                const tex = createCharacterTexture(color, isP2);
+                const mat = new THREE.SpriteMaterial({ map: tex });
+                this.sprite = new THREE.Sprite(mat);
+                this.sprite.scale.set(1.5, 1.5, 1);
+                this.sprite.position.set(startX, 0.75, 0);
+                scene.add(this.sprite);
+
+                // Effetto Hitbox (Anello luminoso)
+                const hitGeo = new THREE.TorusGeometry(0.8, 0.05, 16, 32);
+                const hitMat = new THREE.MeshBasicMaterial({ color: 0x00ffcc, transparent: true, opacity: 0 });
+                this.hitVisual = new THREE.Mesh(hitGeo, hitMat);
+                this.hitVisual.rotation.x = Math.PI / 2;
+                scene.add(this.hitVisual);
+
+                this.isAttacking = false;
+                this.facing = new THREE.Vector3(isP2 ? -1 : 1, 0, 0);
+            }
+
+            attack() {
+                if (this.isAttacking) return;
+                this.isAttacking = true;
+                this.hitVisual.material.opacity = 1;
+                // Animazione di scatto in avanti
+                this.sprite.position.add(this.facing.clone().multiplyScalar(0.5));
+                
+                setTimeout(() => {
+                    this.isAttacking = false;
+                    this.hitVisual.material.opacity = 0;
+                    this.sprite.position.sub(this.facing.clone().multiplyScalar(0.5));
+                }, 150);
+            }
+
+            update(keys, up, down, left, right, atkKey) {
+                const move = new THREE.Vector3(0, 0, 0);
+                if (keys[up]) move.z -= 1;
+                if (keys[down]) move.z += 1;
+                if (keys[left]) move.x -= 1;
+                if (keys[right]) move.x += 1;
+
+                if (move.length() > 0) {
+                    move.normalize().multiplyScalar(0.1);
+                    this.sprite.position.add(move);
+                    this.facing.copy(move).normalize();
+                    // Effetto rimbalzo mentre cammina
+                    this.sprite.position.y = 0.75 + Math.abs(Math.sin(Date.now() * 0.01)) * 0.2;
+                } else {
+                    this.sprite.position.y = 0.75;
+                }
+
+                if (keys[atkKey]) this.attack();
+
+                this.hitVisual.position.copy(this.sprite.position);
+                this.hitVisual.position.y = 0.1;
+                this.hitVisual.position.add(this.facing.clone().multiplyScalar(1));
+            }
+        }
+
+        const p1 = new Fighter('#ff4757', -3, false); // Rosso corallo
+        const p2 = new Fighter('#2e86de', 3, true);   // Blu chiaro
+
+        const keys = {};
+        window.addEventListener('keydown', (e) => keys[e.code] = true);
+        window.addEventListener('keyup', (e) => keys[e.code] = false);
+
+        function animate() {
+            requestAnimationFrame(animate);
+            p1.update(keys, 'KeyW', 'KeyS', 'KeyA', 'KeyD', 'Digit1');
+            p2.update(keys, 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Digit0');
+
+            // Collisione semplice
+            if (p1.isAttacking && p1.hitVisual.position.distanceTo(p2.sprite.position) < 1.2) {
+                p2.sprite.material.color.set(0xffffff);
+                setTimeout(() => p2.sprite.material.color.set(0xffffff), 50); // Flash
+            } else {
+                p2.sprite.material.color.set(0xffffff);
+            }
+
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        window.addEventListener('resize', () => {
+            const aspect = window.innerWidth / window.innerHeight;
+            camera.left = -d * aspect; camera.right = d * aspect;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
+</body>
+</html>
